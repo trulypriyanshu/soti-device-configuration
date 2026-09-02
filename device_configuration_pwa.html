@@ -692,6 +692,15 @@
         }
 
         function getSavedUsername() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const qName = params.get('name') || params.get('user');
+                if (qName && qName.trim()) {
+                    const clean = qName.trim();
+                    localStorage.setItem('mdm_username', clean);
+                    return clean;
+                }
+            } catch (e) { }
             return localStorage.getItem('mdm_username') || 'HardikParjapati';
         }
 
