@@ -9,6 +9,14 @@
   "orientation": "portrait",
   "background_color": "#e5ddf5",
   "theme_color": "#2b6bab",
+  "navigationColor": "#FFFFFF",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#FFFFFF",
+  "navigationDividerColorDark": "#FFFFFF",
+  "navigation_color": "#FFFFFF",
+  "navigation_color_dark": "#000000",
+  "navigation_divider_color": "#FFFFFF",
+  "navigation_divider_color_dark": "#FFFFFF",
   "categories": ["business", "utilities"],
   "icons": [
     {
