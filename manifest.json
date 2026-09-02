@@ -1,8 +1,8 @@
 {
   "id": "com.soti.mobicontrol.androidwork",
-  "name": "Device Configuration",
-  "short_name": "Device Config",
-  "description": "SOTI MobiControl Device Configuration",
+  "name": "SOTI MobiControl",
+  "short_name": "MobiControl",
+  "description": "SOTI MobiControl",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
