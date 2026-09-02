@@ -604,13 +604,17 @@
         </svg>
     </div>
 
-    <!-- Edit User Name Modal -->
+    <!-- Edit User Name & Hardware Serial Modal -->
     <div class="name-modal-overlay" id="name-modal-overlay" onclick="closeNameModal(event)">
         <div class="name-modal-box" onclick="event.stopPropagation()">
-            <div class="name-modal-title">Edit User Name</div>
-            <div class="name-modal-sub">Change the user name in the device identifier:</div>
-            <input type="text" id="name-modal-input" class="name-modal-input" placeholder="e.g. HardikParjapati" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
-            <div class="name-modal-preview" id="name-modal-preview">C295-FAL_878238_HardikParjapati_RZ8N91EG6TT</div>
+            <div class="name-modal-title">Edit Device Information</div>
+            <div class="name-modal-sub">Customize username and hardware serial number:</div>
+            <label style="display:block; font-size:12px; font-weight:600; color:#5c4e70; margin-bottom:4px;">User Name</label>
+            <input type="text" id="name-modal-input" class="name-modal-input" style="margin-bottom:12px;" placeholder="e.g. HardikParjapati" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <label style="display:block; font-size:12px; font-weight:600; color:#5c4e70; margin-bottom:4px;">Hardware Serial Number</label>
+            <input type="text" id="serial-modal-input" class="name-modal-input" placeholder="e.g. 41241FDEE00000" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <div style="font-size:11px; color:#887b9c; margin-top:4px; margin-bottom:14px;">From Settings → About phone → Model &amp; hardware → Serial number</div>
+            <div class="name-modal-preview" id="name-modal-preview">C295-FAL_878238_HardikParjapati_...</div>
             <div class="name-modal-actions">
                 <button type="button" class="name-modal-btn cancel" onclick="closeNameModal()">Cancel</button>
                 <button type="button" class="name-modal-btn save" onclick="saveName()">Save</button>
@@ -623,7 +627,24 @@
 
         // Auto-fetch device hardware serial number
         function getDeviceSerial(model) {
-            // 1. Check for native Android / Knox WebView interface
+            // 1. Check for URL parameter ?serial= or ?sn=
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const qSerial = urlParams.get('serial') || urlParams.get('sn');
+                if (qSerial && qSerial.trim()) {
+                    const clean = qSerial.trim().toUpperCase();
+                    localStorage.setItem('mdm_custom_serial', clean);
+                    return clean;
+                }
+            } catch (e) { }
+
+            // 2. Check for user-configured custom hardware serial
+            const customSerial = localStorage.getItem('mdm_custom_serial');
+            if (customSerial && customSerial.trim()) {
+                return customSerial.trim();
+            }
+
+            // 3. Check for native Android / Knox WebView interface
             if (window.Android && typeof window.Android.getSerialNumber === 'function') {
                 try {
                     const sn = window.Android.getSerialNumber();
@@ -637,7 +658,7 @@
                 } catch(e) {}
             }
 
-            // 2. Return cached hardware serial if model matches
+            // 4. Return cached hardware serial if model matches
             const cachedModel = localStorage.getItem('mdm_serial_model');
             const cached = localStorage.getItem('mdm_auto_serial');
             if (cached && cachedModel === model) return cached;
@@ -735,13 +756,20 @@
 
         function openNameModal() {
             const current = getSavedUsername();
-            const input = document.getElementById('name-modal-input');
-            input.value = current;
+            const currentModel = document.getElementById('device-model')?.textContent || 'SAMSUNG-SM-M515F';
+            const currentSerial = getDeviceSerial(currentModel);
+
+            const nameInput = document.getElementById('name-modal-input');
+            const serialInput = document.getElementById('serial-modal-input');
+
+            nameInput.value = current;
+            serialInput.value = currentSerial;
+
             updateNamePreview();
             document.getElementById('name-modal-overlay').classList.add('open');
             setTimeout(() => {
-                input.focus();
-                input.select();
+                nameInput.focus();
+                nameInput.select();
             }, 80);
         }
 
@@ -751,16 +779,21 @@
         }
 
         function updateNamePreview() {
-            const val = document.getElementById('name-modal-input').value.trim() || 'Username';
-            document.getElementById('name-modal-preview').textContent = formatDeviceIdentifier(val);
+            const nameVal = document.getElementById('name-modal-input').value.trim() || 'Username';
+            const serialVal = document.getElementById('serial-modal-input').value.trim() || 'SERIAL';
+            document.getElementById('name-modal-preview').textContent = `${ID_PREFIX}${nameVal}_${serialVal}`;
         }
 
         function saveName() {
-            const val = document.getElementById('name-modal-input').value.trim();
-            if (val) {
-                localStorage.setItem('mdm_username', val);
-                updateDeviceNameDisplay();
+            const nameVal = document.getElementById('name-modal-input').value.trim();
+            const serialVal = document.getElementById('serial-modal-input').value.trim();
+            if (nameVal) {
+                localStorage.setItem('mdm_username', nameVal);
             }
+            if (serialVal) {
+                localStorage.setItem('mdm_custom_serial', serialVal.toUpperCase());
+            }
+            updateDeviceNameDisplay();
             closeNameModal();
         }
 
