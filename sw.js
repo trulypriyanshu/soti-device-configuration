@@ -1,9 +1,11 @@
-const CACHE_NAME = 'soti-config-v3';
+const CACHE_NAME = 'soti-config-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './soti-mobicontrol-squircle.svg'
+  './soti-mobicontrol-squircle.svg',
+  './192.png',
+  './512.png'
 ];
 
 // Install: Pre-cache and activate immediately
