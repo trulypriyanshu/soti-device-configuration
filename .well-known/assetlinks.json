@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.soti_mdm.twa",
+    "sha256_cert_fingerprints": ["FE:C2:EB:A8:09:38:3C:B6:19:11:A0:DD:50:0B:34:2D:6F:EB:76:3C:D7:EC:9A:73:85:C4:99:4C:BE:74:FD:AB"]
+  }
+}]
