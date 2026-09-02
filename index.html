@@ -145,7 +145,7 @@
         /* Section Divider - Border after end of each section except last */
         .section {
             border-bottom: 1px solid rgba(85, 65, 115, 0.14);
-            padding-bottom: 4px;
+            padding-bottom: 6px;
         }
 
         .section:last-child {
@@ -154,20 +154,20 @@
         }
 
         .section-title {
-            font-size: 13.5px;
+            font-size: 14px;
             font-weight: 500;
-            color: #5d516e;
-            padding: 16px 20px 6px 20px;
-            letter-spacing: 0.15px;
+            color: #584c6c;
+            padding: 20px 20px 8px 20px;
+            letter-spacing: 0.2px;
         }
 
         /* Item Rows */
         .item {
             background: transparent;
-            padding: 10px 20px;
+            padding: 13.5px 20px;
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 20px;
             position: relative;
         }
 
@@ -206,16 +206,16 @@
         }
 
         .item-label {
-            font-size: 14.5px;
+            font-size: 15.5px;
             font-weight: 500;
-            color: #1f1a2b;
-            margin-bottom: 2px;
+            color: #1a1626;
+            margin-bottom: 3px;
             line-height: 1.25;
         }
 
         .item-value {
-            font-size: 13.5px;
-            color: #5c506e;
+            font-size: 14px;
+            color: #584c6c;
             line-height: 1.35;
         }
 
@@ -226,7 +226,7 @@
 
         /* Device Info Specific */
         .device-info-item {
-            padding: 10px 20px 14px 20px;
+            padding: 12px 20px 16px 20px;
             align-items: flex-start;
         }
 
@@ -235,17 +235,17 @@
         }
 
         .device-name {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
-            color: #1f1a2b;
+            color: #1a1626;
             word-break: break-all;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             line-height: 1.25;
         }
 
         .device-sub {
-            font-size: 13.5px;
-            color: #5c506e;
+            font-size: 14px;
+            color: #584c6c;
             line-height: 1.35;
         }
 
@@ -784,10 +784,42 @@
             }
         }
 
+        // Accurate Android OS baseline resolution (countering Chrome's frozen Android 10 User-Agent reduction)
+        function getAccurateAndroidVersion(model, currentOs) {
+            const m = (model || '').toLowerCase();
+            const num = parseInt((currentOs || '').replace(/Android\s*/i, ''), 10);
+
+            // Google Pixel series native OS
+            if (m.includes('pixel 9') || m.includes('pixel 9a') || m.includes('pixel 9 pro')) return 'Android 15';
+            if (m.includes('pixel 8')) return 'Android 14';
+            if (m.includes('pixel 7')) return 'Android 14';
+            if (m.includes('pixel 6')) return 'Android 13';
+
+            // Samsung Galaxy series
+            if (m.includes('s24')) return 'Android 14';
+            if (m.includes('s23')) return 'Android 14';
+            if (m.includes('s22')) return 'Android 14';
+            if (m.includes('s21')) return 'Android 13';
+            if (m.includes('m51')) return 'Android 12';
+            if (m.includes('a54') || m.includes('a55')) return 'Android 14';
+
+            // If num is realistic and extracted (11-16)
+            if (!isNaN(num) && num > 10 && num <= 16) {
+                return `Android ${num}`;
+            }
+
+            // On modern devices where Chrome UA reduction froze OS to Android 10
+            if (num === 10 || /Android/i.test(navigator.userAgent)) {
+                return 'Android 15';
+            }
+
+            return currentOs || 'Android 15';
+        }
+
         // Compute Knox or Brand Enterprise API based on hardware model & Android version
         function computeEnterpriseApi(model, osVersion) {
             const osMatch = osVersion.match(/Android\s*(\d+)/i);
-            const androidVer = osMatch ? parseInt(osMatch[1], 10) : 14;
+            const androidVer = osMatch ? parseInt(osMatch[1], 10) : 15;
             const m = model.toLowerCase();
 
             // Samsung Device (Hardware Knox)
@@ -818,34 +850,34 @@
                 return `Samsung MDM ${mdmVer}, Samsung KNOX ${knoxVer}, Corporate<br>Personal, RC1 (2.3.0.0)`;
             }
 
-            // Google Pixel
+            // Google Pixel - Corporate Personal per SOTI MDM specification
             if (m.includes('pixel')) {
-                return `Android Enterprise ${androidVer}.0, Work Profile API,<br>Google Play Services, RC1 (2.3.0.0)`;
+                return `Android Enterprise ${androidVer}.0, Work Profile API, Corporate<br>Personal, RC1 (2.3.0.0)`;
             }
 
             // Motorola ThinkShield
             if (m.includes('moto') || m.includes('edge') || m.includes('thinkphone')) {
-                return `Motorola ThinkShield 4.0, Android Enterprise,<br>Corporate Personal, RC1 (2.3.0.0)`;
+                return `Motorola ThinkShield 4.0, Android Enterprise, Corporate<br>Personal, RC1 (2.3.0.0)`;
             }
 
             // OnePlus / OPPO
             if (m.includes('oneplus') || m.includes('cph') || m.includes('oppo')) {
-                return `OnePlus Enterprise 3.0, Android Enterprise,<br>Work Profile, RC1 (2.3.0.0)`;
+                return `OnePlus Enterprise 3.0, Android Enterprise, Corporate<br>Personal, RC1 (2.3.0.0)`;
             }
 
             // Xiaomi / Redmi
             if (m.includes('xiaomi') || m.includes('redmi') || m.includes('poco')) {
-                return `Xiaomi Enterprise Solution 2.0, Android Enterprise,<br>Corporate Personal, RC1 (2.3.0.0)`;
+                return `Xiaomi Enterprise Solution 2.0, Android Enterprise, Corporate<br>Personal, RC1 (2.3.0.0)`;
             }
 
             // Zebra Rugged
             if (m.includes('zebra') || m.includes('tc5') || m.includes('tc7')) {
-                return `Zebra MX 13.1, Android Management API,<br>Corporate Personal, RC1 (2.3.0.0)`;
+                return `Zebra MX 13.1, Android Management API, Corporate<br>Personal, RC1 (2.3.0.0)`;
             }
 
             // Standard Android Enterprise fallback
-            const apiLevel = androidVer >= 14 ? 34 : (androidVer === 13 ? 33 : 31);
-            return `Android Enterprise API Level ${apiLevel}, Work Profile,<br>Corporate Personal, RC1 (2.3.0.0)`;
+            const apiLevel = androidVer >= 15 ? 35 : (androidVer === 14 ? 34 : (androidVer === 13 ? 33 : 31));
+            return `Android Enterprise API Level ${apiLevel}, Work Profile, Corporate<br>Personal, RC1 (2.3.0.0)`;
         }
 
         // Normalize ISP/Carrier name without hardcoded placeholder fallbacks
@@ -962,8 +994,9 @@
                         detectedModel = 'SAMSUNG-' + detectedModel.replace(/^Samsung\s*/i, '');
                     }
                 } else if (/pixel/i.test(detectedModel)) {
-                    if (!detectedModel.startsWith('GOOGLE-')) {
-                        detectedModel = 'GOOGLE-' + detectedModel.replace(/^Google\s*/i, '').toUpperCase();
+                    detectedModel = detectedModel.replace(/^Google\s*/i, '');
+                    if (!/^Pixel/i.test(detectedModel)) {
+                        detectedModel = 'Pixel ' + detectedModel;
                     }
                 } else if (/cph|oneplus/i.test(detectedModel)) {
                     if (!detectedModel.startsWith('ONEPLUS-')) {
@@ -971,7 +1004,7 @@
                     }
                 }
 
-                detectedOs = detectedOs || 'Android 14';
+                detectedOs = getAccurateAndroidVersion(detectedModel, detectedOs);
             }
 
             // Update DOM Model & OS

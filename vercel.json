@@ -11,6 +11,14 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Accept-CH",
+          "value": "Sec-CH-UA-Model, Sec-CH-UA-Platform-Version"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "ch-ua-model=*, ch-ua-platform-version=*"
         }
       ]
     },
