@@ -1,7 +1,7 @@
 {
   "id": "com.soti.mobicontrol.androidwork",
   "name": "SOTI MobiControl",
-  "short_name": "MobiControl",
+  "short_name": "SOTI MobiControl",
   "description": "SOTI MobiControl",
   "start_url": "./index.html",
   "scope": "./",
