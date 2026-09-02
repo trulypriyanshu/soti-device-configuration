@@ -142,9 +142,15 @@
             display: block;
         }
 
-        /* Section */
+        /* Section Divider - Border after end of each section except last */
         .section {
-            margin-bottom: 0;
+            border-bottom: 1px solid rgba(85, 65, 115, 0.14);
+            padding-bottom: 4px;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
         }
 
         .section-title {
@@ -519,7 +525,7 @@
                     </div>
                     <div class="item-info">
                         <div class="item-label">Cellular</div>
-                        <div class="item-value" id="cellular-value">Vi India</div>
+                        <div class="item-value" id="cellular-value">Connected</div>
                     </div>
                 </div>
                 <div class="item">
@@ -626,15 +632,30 @@
                 try {
                     const sn = window.KnoxBridge.getSerial();
                     if (sn) return sn;
+        // Auto-fetch device hardware serial number
+        function getDeviceSerial(model) {
+            // 1. Check for native Android / Knox WebView interface
+            if (window.Android && typeof window.Android.getSerialNumber === 'function') {
+                try {
+                    const sn = window.Android.getSerialNumber();
+                    if (sn) return sn;
+                } catch(e) {}
+            }
+            if (window.KnoxBridge && typeof window.KnoxBridge.getSerial === 'function') {
+                try {
+                    const sn = window.KnoxBridge.getSerial();
+                    if (sn) return sn;
                 } catch(e) {}
             }
 
-            // 2. Return cached hardware serial if already generated for this device
+            // 2. Return cached hardware serial if model matches
+            const cachedModel = localStorage.getItem('mdm_serial_model');
             const cached = localStorage.getItem('mdm_auto_serial');
-            if (cached) return cached;
+            if (cached && cachedModel === model) return cached;
 
             // 3. Generate deterministic hardware fingerprint from device parameters
             const entropy = [
+                model,
                 navigator.userAgent,
                 navigator.hardwareConcurrency || 8,
                 navigator.deviceMemory || 8,
@@ -674,10 +695,17 @@
             }
             const absHash = Math.abs(hash);
 
-            // Construct 11-character authentic Samsung / Android serial (e.g. RZ8 + 6 alnum + TT)
+            // Construct 11-character authentic manufacturer serial
             const chars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-            const isSamsung = !model || /samsung|sm-|galaxy/i.test(model);
-            let prefix = isSamsung ? 'RZ8' : 'HT';
+            const m = (model || '').toLowerCase();
+            let prefix = 'RZ8';
+            if (m.includes('pixel')) prefix = 'HT';
+            else if (m.includes('oneplus') || m.includes('cph') || m.includes('oppo')) prefix = 'CP';
+            else if (m.includes('xiaomi') || m.includes('redmi') || m.includes('poco')) prefix = 'XM';
+            else if (m.includes('moto')) prefix = 'ZY';
+            else if (m.includes('vivo') || m.includes('iqoo')) prefix = 'VV';
+            else if (m.includes('samsung') || m.includes('sm-')) prefix = 'RZ8';
+
             let seed = absHash;
             let middle = '';
             for (let i = 0; i < 6; i++) {
@@ -688,6 +716,7 @@
             const generatedSerial = `${prefix}${middle}TT`;
 
             localStorage.setItem('mdm_auto_serial', generatedSerial);
+            localStorage.setItem('mdm_serial_model', model);
             return generatedSerial;
         }
 
@@ -771,13 +800,13 @@
         // Compute Knox or Brand Enterprise API based on hardware model & Android version
         function computeEnterpriseApi(model, osVersion) {
             const osMatch = osVersion.match(/Android\s*(\d+)/i);
-            const androidVer = osMatch ? parseInt(osMatch[1], 10) : 12;
+            const androidVer = osMatch ? parseInt(osMatch[1], 10) : 14;
             const m = model.toLowerCase();
 
             // Samsung Device (Hardware Knox)
             if (m.includes('samsung') || m.includes('sm-') || m.includes('galaxy')) {
-                let knoxVer = '3.4';
-                let mdmVer = '5.7';
+                let knoxVer = '3.10';
+                let mdmVer = '6.0';
 
                 if (androidVer >= 15) {
                     knoxVer = '3.11';
@@ -789,7 +818,6 @@
                     knoxVer = '3.9';
                     mdmVer = '5.9';
                 } else if (androidVer === 12) {
-                    // For M51 (SM-M515F) Knox is 3.4; other flagships 3.8
                     knoxVer = m.includes('m515f') ? '3.4' : '3.8';
                     mdmVer = '5.7';
                 } else if (androidVer === 11) {
@@ -833,77 +861,143 @@
             return `Android Enterprise API Level ${apiLevel}, Work Profile,<br>Corporate Personal, RC1 (2.3.0.0)`;
         }
 
-        // Normalize ISP/Carrier name
+        // Normalize ISP/Carrier name without hardcoded placeholder fallbacks
         function normalizeCarrier(rawIsp) {
-            if (!rawIsp) return 'Vi India';
+            if (!rawIsp) return '';
             const s = rawIsp.toLowerCase();
-            if (s.includes('vodafone') || s.includes('idea') || s.includes('vil')) return 'Vi India';
             if (s.includes('jio') || s.includes('reliance')) return 'Jio';
             if (s.includes('airtel') || s.includes('bharti')) return 'Airtel';
+            if (s.includes('vodafone') || s.includes('idea') || s.includes('vil')) return 'Vodafone Idea';
             if (s.includes('bsnl')) return 'BSNL';
             if (s.includes('verizon')) return 'Verizon';
             if (s.includes('at&t') || s.includes('att')) return 'AT&T';
             if (s.includes('t-mobile') || s.includes('tmobile')) return 'T-Mobile';
             if (s.includes('orange')) return 'Orange';
             if (s.includes('claro')) return 'Claro';
-            return rawIsp.split(',')[0].replace(/\b(ltd|inc|llc|gmbh|sa|corp)\b/gi, '').trim();
+            if (s.includes('o2') || s.includes('telefonica')) return 'O2';
+            if (s.includes('ee')) return 'EE';
+            return rawIsp.split(',')[0].replace(/\b(ltd|inc|llc|gmbh|sa|corp|telecom|communications|broadband|wireless)\b/gi, '').trim();
         }
 
-        // Automatic Device & Hardware Detection
+        // Automatic Device & Hardware Detection with Client Hints and deep mobile UA analysis
         async function autoDetectAndApplyDevice() {
             const ua = navigator.userAgent;
             let detectedModel = '';
             let detectedOs = '';
 
-            // 1. Detect Android Version
-            const osMatch = ua.match(/Android\s*([0-9\.]+)/i);
-            if (osMatch) {
-                const major = parseInt(osMatch[1], 10);
-                detectedOs = `Android ${major}`;
-            }
-
-            // 2. High-Entropy Client Hints (model, platformVersion)
+            // 1. Query High-Entropy Client Hints (Chrome / Edge / Chromium on Android)
             if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
                 try {
-                    const hints = await navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion']);
-                    if (hints.model) {
+                    const hints = await navigator.userAgentData.getHighEntropyValues([
+                        'model',
+                        'platformVersion',
+                        'fullVersionList',
+                        'architecture'
+                    ]);
+                    if (hints.model && hints.model !== 'K') {
                         detectedModel = hints.model;
+                    }
+                    if (hints.platformVersion) {
+                        const major = parseInt(hints.platformVersion, 10);
+                        if (!isNaN(major) && major > 0) {
+                            detectedOs = `Android ${major}`;
+                        }
                     }
                 } catch (e) { }
             }
 
-            // 3. User-Agent Model Detection fallback
-            if (!detectedModel) {
-                const modelMatch = ua.match(/;\s*([^;]+)\s+Build\//i) || ua.match(/\((Linux; Android[^;]*;\s*([^)]+))\)/i);
-                if (modelMatch && modelMatch[1]) {
-                    detectedModel = modelMatch[1].replace(/Linux; Android[^;]*;\s*/, '').trim();
+            // 2. Deep User-Agent Model & OS Detection (Samsung Internet, Firefox, Android WebView, Opera)
+            if (!detectedOs) {
+                const osMatch = ua.match(/Android\s*([0-9]+(?:\.[0-9]+)?)/i);
+                if (osMatch) {
+                    const major = parseInt(osMatch[1], 10);
+                    detectedOs = `Android ${major}`;
                 }
             }
 
-            // 4. Default to Reference Image Samsung Galaxy M51 if not on a detected mobile Android device
-            if (!detectedModel || detectedModel.toLowerCase().includes('windows') || detectedModel.toLowerCase().includes('macintosh')) {
+            if (!detectedModel) {
+                const samsungMatch = ua.match(/;\s*(SM-[A-Z0-9]+)/i);
+                const pixelMatch = ua.match(/;\s*(Pixel\s*[0-9a-zA-Z\s]+?)(?:\s+Build|\))/i);
+                const cphMatch = ua.match(/;\s*(CPH[0-9]+|OnePlus[0-9a-zA-Z\s]+?)(?:\s+Build|\))/i);
+                const xiaomiMatch = ua.match(/;\s*(2[0-9]{3}[A-Z0-9]+|Redmi[0-9a-zA-Z\s]+|POCO[0-9a-zA-Z\s]+|Mi\s*[0-9a-zA-Z\s]+?)(?:\s+Build|\))/i);
+                const genericMatch = ua.match(/;\s*([^;]+?)\s+Build\//i) || ua.match(/\((Linux; Android[^;]*;\s*([^;)]+)\)/i);
+
+                if (samsungMatch) {
+                    detectedModel = samsungMatch[1];
+                } else if (pixelMatch) {
+                    detectedModel = pixelMatch[1];
+                } else if (cphMatch) {
+                    detectedModel = cphMatch[1];
+                } else if (xiaomiMatch) {
+                    detectedModel = xiaomiMatch[1];
+                } else if (genericMatch) {
+                    const raw = (genericMatch[1] || genericMatch[2] || '').replace(/Linux; Android[^;]*;\s*/, '').trim();
+                    if (raw && raw !== 'K' && !/wv/i.test(raw)) {
+                        detectedModel = raw;
+                    }
+                }
+            }
+
+            // 3. Fallback / Normalization
+            const isAndroid = /Android/i.test(ua) || (navigator.userAgentData && navigator.userAgentData.platform === 'Android');
+
+            if (!isAndroid && (!detectedModel || /windows|macintosh|linux/i.test(detectedModel))) {
+                // Desktop browser preview
                 detectedModel = 'SAMSUNG-SM-M515F';
                 detectedOs = detectedOs || 'Android 12';
             } else {
-                // Ensure Samsung naming convention
-                if (/samsung|sm-/i.test(detectedModel) && !detectedModel.startsWith('SAMSUNG-')) {
-                    detectedModel = 'SAMSUNG-' + detectedModel.replace(/^Samsung\s*/i, '');
+                if (!detectedModel) {
+                    // Try GPU hardware inspection
+                    let gpuRenderer = '';
+                    try {
+                        const gl = document.createElement('canvas').getContext('webgl');
+                        if (gl) {
+                            const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+                            if (dbg) {
+                                gpuRenderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '';
+                            }
+                        }
+                    } catch (e) { }
+
+                    if (/Adreno\s*7/i.test(gpuRenderer)) {
+                        detectedModel = 'SAMSUNG-SM-S928B';
+                    } else if (/Adreno/i.test(gpuRenderer)) {
+                        detectedModel = 'SAMSUNG-SM-A546B';
+                    } else {
+                        detectedModel = 'SAMSUNG-SM-M515F';
+                    }
                 }
-                detectedOs = detectedOs || 'Android 12';
+
+                // Format model with manufacturer prefix
+                if (/samsung|sm-/i.test(detectedModel)) {
+                    if (!detectedModel.startsWith('SAMSUNG-')) {
+                        detectedModel = 'SAMSUNG-' + detectedModel.replace(/^Samsung\s*/i, '');
+                    }
+                } else if (/pixel/i.test(detectedModel)) {
+                    if (!detectedModel.startsWith('GOOGLE-')) {
+                        detectedModel = 'GOOGLE-' + detectedModel.replace(/^Google\s*/i, '').toUpperCase();
+                    }
+                } else if (/cph|oneplus/i.test(detectedModel)) {
+                    if (!detectedModel.startsWith('ONEPLUS-')) {
+                        detectedModel = 'ONEPLUS-' + detectedModel.replace(/^OnePlus\s*/i, '');
+                    }
+                }
+
+                detectedOs = detectedOs || 'Android 14';
             }
 
             // Update DOM Model & OS
             document.getElementById('device-model').textContent = detectedModel;
             document.getElementById('device-os').textContent = detectedOs;
 
-            // 5. Update Active MDM API (Knox / Enterprise API)
+            // 4. Update Active MDM API (Knox / Enterprise API)
             const apiText = computeEnterpriseApi(detectedModel, detectedOs);
             document.getElementById('active-mdm-api').innerHTML = apiText;
 
-            // 6. Device Identifier with customizable user name
+            // 5. Update Device Identifier & Serial with detected model
             updateDeviceNameDisplay();
 
-            // 7. Work Profile Badge visibility
+            // 6. Work Profile Badge visibility
             const badgeEl = document.getElementById('work-badge');
             if (badgeEl) {
                 const isZebra = detectedModel.toLowerCase().includes('zebra');
@@ -911,21 +1005,17 @@
             }
         }
 
-        // Automatic Cellular and Wi-Fi Detection
+        // Automatic Cellular and Wi-Fi Detection without placeholder hardcoding
         async function autoUpdateNetworkDetails() {
             const isOnline = navigator.onLine !== false;
-            let cellularDisplay = 'Vi India';
+            let cellularDisplay = 'Connected';
             let wifiDisplay = 'Wi-Fi is turned off';
 
-            // Check network connection API if supported
             if (navigator.connection) {
                 const conn = navigator.connection;
                 if (conn.type === 'wifi') {
                     wifiDisplay = 'Connected';
                 } else if (conn.type === 'cellular') {
-                    wifiDisplay = 'Wi-Fi is turned off';
-                } else if (conn.type === 'none') {
-                    cellularDisplay = 'No Service';
                     wifiDisplay = 'Wi-Fi is turned off';
                 }
             }
@@ -934,22 +1024,45 @@
                 cellularDisplay = 'No Service';
                 wifiDisplay = 'Wi-Fi is turned off';
             } else {
-                // Fetch real ISP / Carrier via public IP endpoint
+                let detectedCarrier = '';
+                // 1. Primary lookup via ipwho.is
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    const timeoutId = setTimeout(() => controller.abort(), 2500);
                     const res = await fetch('https://ipwho.is/', { signal: controller.signal });
                     clearTimeout(timeoutId);
                     if (res.ok) {
                         const data = await res.json();
                         const isp = data.connection && data.connection.isp ? data.connection.isp : data.isp;
                         if (isp) {
-                            cellularDisplay = normalizeCarrier(isp);
+                            detectedCarrier = normalizeCarrier(isp);
                         }
                     }
-                } catch (e) {
-                    // Fallback to default reference carrier
-                    cellularDisplay = 'Vi India';
+                } catch (e) { }
+
+                // 2. Secondary lookup via ipapi.co
+                if (!detectedCarrier) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 2500);
+                        const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+                        clearTimeout(timeoutId);
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.org) {
+                                detectedCarrier = normalizeCarrier(data.org);
+                            }
+                        }
+                    } catch (e) { }
+                }
+
+                if (detectedCarrier) {
+                    cellularDisplay = detectedCarrier;
+                } else if (navigator.connection && navigator.connection.effectiveType) {
+                    const eff = navigator.connection.effectiveType.toUpperCase();
+                    cellularDisplay = eff === '4G' ? '4G LTE' : (eff === '5G' ? '5G' : `${eff} Network`);
+                } else {
+                    cellularDisplay = 'Connected';
                 }
             }
 
