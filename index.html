@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SOTI MobiControl</title>
     <meta name="application-name" content="SOTI MobiControl">
     <meta name="apple-mobile-web-app-title" content="SOTI MobiControl">
@@ -132,7 +132,7 @@
 
         /* Content Container */
         .content {
-            padding-bottom: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
             background: #e5ddf5;
         }
 
