@@ -1,11 +1,9 @@
-const CACHE_NAME = 'soti-config-v2';
+const CACHE_NAME = 'soti-config-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './soti-mobicontrol-squircle.svg',
-  './icon-192.png',
-  './icon-512.png'
+  './soti-mobicontrol-squircle.svg'
 ];
 
 // Install: Pre-cache and activate immediately
@@ -32,7 +30,6 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch: Network-First Strategy
-// Always fetch latest from network first; update cache; only fallback to cache if offline
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
