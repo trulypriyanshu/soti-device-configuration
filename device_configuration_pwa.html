@@ -884,9 +884,10 @@
                     if (hints.model && hints.model !== 'K') {
                         detectedModel = hints.model;
                     }
-                    if (hints.platformVersion) {
+                    const isAndroidPlatform = (navigator.userAgentData && navigator.userAgentData.platform === 'Android') || /Android/i.test(ua);
+                    if (hints.platformVersion && isAndroidPlatform) {
                         const major = parseInt(hints.platformVersion, 10);
-                        if (!isNaN(major) && major > 0) {
+                        if (!isNaN(major) && major >= 9 && major <= 16) {
                             detectedOs = `Android ${major}`;
                         }
                     }
@@ -931,7 +932,7 @@
             if (!isAndroid && (!detectedModel || /windows|macintosh|linux/i.test(detectedModel))) {
                 // Desktop browser preview
                 detectedModel = 'SAMSUNG-SM-M515F';
-                detectedOs = detectedOs || 'Android 12';
+                detectedOs = 'Android 12';
             } else {
                 if (!detectedModel) {
                     // Try GPU hardware inspection
