@@ -301,19 +301,23 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.55);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 300;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease;
             padding: 24px;
+            pointer-events: none;
         }
 
         .name-modal-overlay.open {
-            opacity: 1;
-            visibility: visible;
+            display: flex;
+            pointer-events: auto;
+            animation: modalFadeIn 0.15s ease forwards;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .name-modal-box {
@@ -323,12 +327,12 @@
             border-radius: 16px;
             padding: 22px 20px 18px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            transform: scale(0.92);
-            transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+            animation: modalPopIn 0.18s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
         }
 
-        .name-modal-overlay.open .name-modal-box {
-            transform: scale(1);
+        @keyframes modalPopIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .name-modal-title {
