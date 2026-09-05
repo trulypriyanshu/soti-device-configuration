@@ -38,6 +38,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             user-select: none;
+            min-height: 100vh;
         }
 
         /* App Header */
@@ -47,12 +48,19 @@
             position: sticky;
             top: 0;
             z-index: 50;
+            transition: background 0.2s;
+        }
+
+        .header.dark-header {
+            background: #212121 !important;
+            padding-bottom: 14px;
         }
 
         .header-top {
             display: flex;
             align-items: center;
             padding-bottom: 6px;
+            min-height: 32px;
         }
 
         .menu-btn {
@@ -62,7 +70,7 @@
             flex-direction: column;
             justify-content: center;
             position: relative;
-            cursor: default;
+            cursor: pointer;
             flex-shrink: 0;
         }
 
@@ -75,22 +83,36 @@
             margin: 2px 0;
         }
 
-        .menu-badge {
+        .menu-badge-dot {
             position: absolute;
-            top: -3px;
+            top: 0px;
             right: 1px;
-            width: 13px;
-            height: 13px;
+            width: 7px;
+            height: 7px;
             background: #eb3c32;
-            color: #ffffff;
             border-radius: 50%;
-            font-size: 9px;
-            font-weight: 700;
-            display: flex;
+            border: 1.5px solid #2b6bab;
+        }
+
+        .back-btn {
+            width: 28px;
+            height: 28px;
+            display: none;
             align-items: center;
             justify-content: center;
-            line-height: 1;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            cursor: pointer;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .back-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #ffffff;
+            stroke-width: 2.2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .header-title {
@@ -99,9 +121,38 @@
             font-weight: 500;
             letter-spacing: 0.2px;
             margin-left: 18px;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* Tabs */
+        .header-actions {
+            display: none;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-action-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-action-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: #ffffff;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Tabs Container */
         .tabs {
             display: flex;
             margin-top: 14px;
@@ -111,15 +162,16 @@
         .tab {
             flex: 1;
             text-align: center;
-            padding: 10px 0 11px;
+            padding: 10px 4px 11px;
             color: rgba(255, 255, 255, 0.72);
             font-size: 13.5px;
             font-weight: 500;
-            letter-spacing: 0.6px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             cursor: pointer;
             position: relative;
             transition: color 0.15s;
+            white-space: nowrap;
         }
 
         .tab.active {
@@ -136,9 +188,18 @@
             background: #ffffff;
         }
 
+        /* Screens */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
         /* Content Container */
         .content {
-            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
             background: #e5ddf5;
         }
 
@@ -150,7 +211,7 @@
             display: block;
         }
 
-        /* Section Divider - Border after end of each section except last */
+        /* Section Divider */
         .section {
             border-bottom: 1px solid rgba(85, 65, 115, 0.12);
             padding-bottom: 6px;
@@ -187,6 +248,14 @@
             right: 18px;
             height: 1px;
             background: rgba(85, 65, 115, 0.11);
+        }
+
+        .item.clickable {
+            cursor: pointer;
+        }
+
+        .item.clickable:active {
+            background: rgba(85, 65, 115, 0.06);
         }
 
         .item-icon {
@@ -257,6 +326,322 @@
             line-height: 1.35;
         }
 
+        /* Profile Details Screen Specifics */
+        .profile-details-content {
+            padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            background: #e5ddf5;
+        }
+
+        .profile-row {
+            padding: 14px 18px;
+            position: relative;
+        }
+
+        .profile-row.with-divider::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 18px;
+            right: 18px;
+            height: 1px;
+            background: rgba(85, 65, 115, 0.11);
+        }
+
+        .profile-row-label {
+            font-size: 13.8px;
+            font-weight: 500;
+            color: #1a1626;
+            margin-bottom: 2px;
+        }
+
+        .profile-row-value {
+            font-size: 12.8px;
+            color: #5c4e70;
+        }
+
+        .profile-row-value.green {
+            color: #3ba14a;
+            font-weight: 500;
+        }
+
+        /* App Catalog List */
+        .app-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            gap: 16px;
+            border-bottom: 1px solid rgba(85, 65, 115, 0.11);
+            background: transparent;
+        }
+
+        .app-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        .app-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .app-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .app-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1626;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-version {
+            font-size: 12px;
+            color: #6b5d80;
+            margin-bottom: 5px;
+        }
+
+        .app-badge {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 500;
+            color: #2b6bab;
+            background: rgba(43, 107, 171, 0.12);
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        .app-badge.new {
+            color: #0b8043;
+            background: rgba(11, 128, 67, 0.12);
+        }
+
+        .app-action-btn {
+            border: 1px solid #2b6bab;
+            background: transparent;
+            color: #2b6bab;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .app-action-btn:active {
+            background: rgba(43, 107, 171, 0.08);
+        }
+
+        /* Empty State Illustration Views */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 90px 32px 60px;
+        }
+
+        .empty-illustration {
+            width: 140px;
+            height: 140px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1626;
+            margin-bottom: 8px;
+        }
+
+        .empty-desc {
+            font-size: 13.5px;
+            color: #5c4e70;
+            max-width: 280px;
+            line-height: 1.45;
+        }
+
+        /* Privacy Screen */
+        .privacy-content {
+            padding: 24px 20px;
+        }
+
+        .privacy-text {
+            font-size: 14px;
+            line-height: 1.55;
+            color: #262033;
+            margin-bottom: 28px;
+        }
+
+        .privacy-btn {
+            background: #2b6bab;
+            color: #ffffff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        .privacy-btn:active {
+            filter: brightness(0.92);
+        }
+
+        /* Slide-Out Navigation Drawer */
+        .drawer-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.52);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .drawer-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 82%;
+            max-width: 320px;
+            background: #ffffff;
+            z-index: 210;
+            transform: translateX(-100%);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            background: #2b6bab;
+            padding: 24px 18px 20px;
+            color: #ffffff;
+        }
+
+        .drawer-device-name {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.3;
+            word-break: break-all;
+            margin-bottom: 4px;
+        }
+
+        .drawer-device-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .drawer-menu {
+            flex: 1;
+            padding: 8px 0;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            padding: 13px 20px;
+            gap: 18px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2b2538;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .drawer-item:active {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .drawer-item.active {
+            background: #e8f0fe;
+            color: #2b6bab;
+        }
+
+        .drawer-item.active .drawer-item-icon svg {
+            stroke: #2b6bab;
+        }
+
+        .drawer-item-icon {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .drawer-item-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: #4e4461;
+            fill: none;
+            stroke-width: 1.9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .drawer-item-title {
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .drawer-badge {
+            background: #eb3c32;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            line-height: 1.2;
+        }
+
+        .drawer-divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
+            margin: 8px 0;
+        }
+
         /* Knox / Work Profile Floating Badge */
         .work-badge {
             position: fixed;
@@ -265,7 +650,7 @@
             width: 20px;
             height: 20px;
             z-index: 95;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             pointer-events: none;
@@ -274,29 +659,6 @@
         .work-badge svg {
             width: 18px;
             height: 18px;
-        }
-
-        /* Profiles tab */
-        .profiles-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            color: #6b5d80;
-        }
-
-        .profiles-placeholder svg {
-            width: 48px;
-            height: 48px;
-            stroke: #8675a0;
-            fill: none;
-            stroke-width: 1.6;
-            margin-bottom: 16px;
-        }
-
-        .profiles-placeholder p {
-            font-size: 14px;
         }
 
         /* Edit Username Modal */
@@ -419,7 +781,7 @@
             display: none;
         }
 
-        /* Prevent Dark Mode auto color inversion on Android/Samsung devices */
+        /* Prevent Dark Mode auto color inversion on Android/Samsung/Pixel devices */
         @media (prefers-color-scheme: dark) {
             :root, html, body {
                 color-scheme: light !important;
@@ -431,7 +793,11 @@
                 background: #2b6bab !important;
             }
 
-            .header-title, .menu-badge, .tab.active {
+            .header.dark-header {
+                background: #212121 !important;
+            }
+
+            .header-title, .tab.active {
                 color: #ffffff !important;
             }
 
@@ -439,19 +805,19 @@
                 color: rgba(255, 255, 255, 0.72) !important;
             }
 
-            .content {
+            .content, .profile-details-content {
                 background: #e5ddf5 !important;
             }
 
-            .section-title, .item-value, .device-sub {
+            .section-title, .item-value, .device-sub, .profile-row-value, .empty-desc, .app-version {
                 color: #5c4e70 !important;
             }
 
-            .item-label, .device-name {
+            .item-label, .device-name, .profile-row-label, .empty-title, .app-title, .privacy-text {
                 color: #1a1626 !important;
             }
 
-            .item-value.green {
+            .item-value.green, .profile-row-value.green {
                 color: #3ba14a !important;
             }
 
@@ -472,12 +838,17 @@
                 border-color: #2b6bab !important;
             }
 
-            .profiles-placeholder {
-                color: #6b5d80 !important;
+            .drawer {
+                background: #ffffff !important;
             }
 
-            .profiles-placeholder svg {
-                stroke: #8675a0 !important;
+            .drawer-item {
+                color: #2b2538 !important;
+            }
+
+            .drawer-item.active {
+                background: #e8f0fe !important;
+                color: #2b6bab !important;
             }
         }
     </style>
@@ -486,188 +857,437 @@
 <body>
 
     <!-- App Header -->
-    <div class="header">
+    <div class="header" id="app-header">
         <div class="header-top">
-            <div class="menu-btn">
+            <div class="menu-btn" id="menu-btn" onclick="openDrawer()">
                 <span></span>
                 <span></span>
                 <span></span>
-                <div class="menu-badge">1</div>
+                <div class="menu-badge-dot"></div>
             </div>
-            <div class="header-title">Device Configuration</div>
-        </div>
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('device')">DEVICE</div>
-            <div class="tab" onclick="switchTab('profiles')">PROFILES</div>
-        </div>
-    </div>
-
-    <div class="content">
-        <!-- DEVICE TAB -->
-        <div id="device-panel" class="tab-panel active">
-            <!-- Device Information -->
-            <div class="section">
-                <div class="section-title">Device Information</div>
-                <div class="item device-info-item" onclick="openNameModal()" title="Tap to change user name" style="cursor: pointer;">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <rect x="5.5" y="2" width="13" height="20" rx="2.5" ry="2.5" />
-                            <line x1="9.5" y1="18.5" x2="14.5" y2="18.5" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="device-name" id="device-name">C295-FAL_878238_HardikParjapati_RZ8N91EG6TT</div>
-                        <div class="device-sub" id="device-model">SAMSUNG-SM-M515F</div>
-                        <div class="device-sub" id="device-os">Android 12</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Management Status -->
-            <div class="section">
-                <div class="section-title">Management Status</div>
-                <div class="item with-divider">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2.5L4.5 5.5v5.5c0 5.2 3.2 10.1 7.5 11.5 4.3-1.4 7.5-6.3 7.5-11.5V5.5L12 2.5z" />
-                            <line x1="12" y1="16.5" x2="12" y2="8.5" />
-                            <polyline points="9 11.5 12 8.5 15 11.5" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Enrollment Status</div>
-                        <div class="item-value green" id="enrollment-status">Enrolled</div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <rect x="3.5" y="3" width="17" height="18" rx="2.5" ry="2.5" />
-                            <line x1="12" y1="16.5" x2="12" y2="8.5" />
-                            <polyline points="9 11.5 12 8.5 15 11.5" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Agent Status</div>
-                        <div class="item-value green" id="agent-status">Connected</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Agent Information -->
-            <div class="section">
-                <div class="section-title">Agent Information</div>
-                <div class="item with-divider">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2.5L4.5 5.5v5.5c0 5.2 3.2 10.1 7.5 11.5 4.3-1.4 7.5-6.3 7.5-11.5V5.5L12 2.5z" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Agent Version</div>
-                        <div class="item-value" id="agent-version">2026.1.5 Build 1204</div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <rect x="3" y="3" width="18" height="18" rx="2.5" ry="2.5" />
-                            <circle cx="12" cy="12" r="2.3" />
-                            <path d="M12 7.5v1.2M12 15.3v1.2M7.5 12h1.2M15.3 12h1.2M8.8 8.8l.85.85M14.35 14.35l.85.85M8.8 15.2l.85-.85M14.35 9.65l.85-.85" stroke-width="2.2" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Active MDM API</div>
-                        <div class="item-value" id="active-mdm-api">Samsung MDM 5.7, Samsung KNOX 3.4, Corporate<br>Personal, RC1 (2.3.0.0)</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Network Settings -->
-            <div class="section">
-                <div class="section-title">Network Settings</div>
-                <div class="item with-divider">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <circle cx="12" cy="10" r="1.4" fill="#252030" />
-                            <line x1="12" y1="11.4" x2="12" y2="20" />
-                            <path d="M8.5 7.5a5 5 0 0 0 0 5" />
-                            <path d="M15.5 7.5a5 5 0 0 1 0 5" />
-                            <path d="M5.5 5a9.2 9.2 0 0 0 0 10" />
-                            <path d="M18.5 5a9.2 9.2 0 0 1 0 10" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Cellular</div>
-                        <div class="item-value" id="cellular-value">Connected</div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M2.5 8.5a14 14 0 0 1 19 0" />
-                            <path d="M5.8 12.2a9.5 9.5 0 0 1 12.4 0" />
-                            <path d="M9.2 15.8a4.8 4.8 0 0 1 5.6 0" />
-                            <circle cx="12" cy="19.5" r="1.2" fill="#252030" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Wi-Fi</div>
-                        <div class="item-value" id="wifi-value">Wi-Fi is turned off</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Troubleshooting -->
-            <div class="section">
-                <div class="section-title">Troubleshooting</div>
-                <div class="item with-divider">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <rect x="3" y="3" width="18" height="18" rx="2.5" ry="2.5" />
-                            <circle cx="7" cy="8" r="1" fill="#252030" />
-                            <line x1="10.5" y1="8" x2="16.5" y2="8" />
-                            <circle cx="7" cy="12" r="1" fill="#252030" />
-                            <line x1="10.5" y1="12" x2="16.5" y2="12" />
-                            <circle cx="7" cy="16" r="1" fill="#252030" />
-                            <line x1="10.5" y1="16" x2="16.5" y2="16" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Event Log</div>
-                        <div class="item-value" id="event-log-value">View the device event logs</div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="item-icon">
-                        <svg viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="9" />
-                            <circle cx="12" cy="9.5" r="2.8" />
-                            <path d="M6.8 17.5a6 6 0 0 1 10.4 0" />
-                        </svg>
-                    </div>
-                    <div class="item-info">
-                        <div class="item-label">Agent Mode</div>
-                        <div class="item-value green" id="agent-mode-value">User</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PROFILES TAB -->
-        <div id="profiles-panel" class="tab-panel">
-            <div class="profiles-placeholder">
+            <div class="back-btn" id="back-btn" onclick="navigateBack()">
                 <svg viewBox="0 0 24 24">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                    <line x1="8" y1="21" x2="16" y2="21" />
-                    <line x1="12" y1="17" x2="12" y2="21" />
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                <p>No profiles configured</p>
+            </div>
+            <div class="header-title" id="header-title">Device Configuration</div>
+            <div class="header-actions" id="header-actions">
+                <div class="header-action-btn" title="Filter">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="4" y1="6" x2="20" y2="6"></line>
+                        <line x1="7" y1="12" x2="17" y2="12"></line>
+                        <line x1="10" y1="18" x2="14" y2="18"></line>
+                    </svg>
+                </div>
+                <div class="header-action-btn" title="Search">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Tabs (Device / Profiles) -->
+        <div class="tabs" id="config-tabs">
+            <div class="tab active" id="tab-btn-device" onclick="switchConfigTab('device')">DEVICE</div>
+            <div class="tab" id="tab-btn-profiles" onclick="switchConfigTab('profiles')">PROFILES</div>
+        </div>
+
+        <!-- App Catalog Tabs (Google Play / In-House / SOTI Snap) -->
+        <div class="tabs" id="catalog-tabs" style="display: none;">
+            <div class="tab active" id="tab-btn-play" onclick="switchCatalogTab('play')">GOOGLE PLAY (29)</div>
+            <div class="tab" id="tab-btn-inhouse" onclick="switchCatalogTab('inhouse')">IN-HOUSE (0)</div>
+            <div class="tab" id="tab-btn-snap" onclick="switchCatalogTab('snap')">SOTI SNAP (0)</div>
+        </div>
+    </div>
+
+    <!-- Navigation Drawer Backdrop & Menu -->
+    <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-device-name" id="drawer-device-name">C295-FAL_13985-Jay_Parmar_62061XEBF2Q0AE</div>
+            <div class="drawer-device-sub" id="drawer-device-sub">Pixel 9a</div>
+        </div>
+        <div class="drawer-menu">
+            <div class="drawer-item" id="nav-item-catalog" onclick="selectDrawerScreen('catalog')">
+                <div class="drawer-item-icon">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                    </svg>
+                </div>
+                <div class="drawer-item-title">App Catalog</div>
+            </div>
+
+            <div class="drawer-item" id="nav-item-messages" onclick="selectDrawerScreen('messages')">
+                <div class="drawer-item-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                <div class="drawer-item-title">Message Center</div>
+                <div class="drawer-badge">19</div>
+            </div>
+
+            <div class="drawer-item active" id="nav-item-config" onclick="selectDrawerScreen('config')">
+                <div class="drawer-item-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </div>
+                <div class="drawer-item-title">Device Configuration</div>
+            </div>
+
+            <div class="drawer-divider"></div>
+
+            <div class="drawer-item" id="nav-item-support" onclick="selectDrawerScreen('support')">
+                <div class="drawer-item-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="drawer-item-title">Support</div>
+            </div>
+
+            <div class="drawer-item" id="nav-item-privacy" onclick="selectDrawerScreen('privacy')">
+                <div class="drawer-item-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <div class="drawer-item-title">Privacy</div>
             </div>
         </div>
     </div>
 
-    <!-- Android Enterprise Work Profile Badge (Knox) -->
+    <!-- 1. DEVICE CONFIGURATION SCREEN -->
+    <div id="screen-config" class="screen active">
+        <div class="content">
+            <!-- DEVICE TAB PANEL -->
+            <div id="device-panel" class="tab-panel active">
+                <!-- Device Information -->
+                <div class="section">
+                    <div class="section-title">Device Information</div>
+                    <div class="item device-info-item clickable" onclick="openNameModal()" title="Tap to customize device information">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="5.5" y="2" width="13" height="20" rx="2.5" ry="2.5" />
+                                <line x1="9.5" y1="18.5" x2="14.5" y2="18.5" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="device-name" id="device-name">C295-FAL_13985-Jay_Parmar_62061XEBF2Q0AE</div>
+                            <div class="device-sub" id="device-model">GOOGLE-Pixel 9a</div>
+                            <div class="device-sub" id="device-os">Android 17</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management Status -->
+                <div class="section">
+                    <div class="section-title">Management Status</div>
+                    <div class="item with-divider">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2.5L4.5 5.5v5.5c0 5.2 3.2 10.1 7.5 11.5 4.3-1.4 7.5-6.3 7.5-11.5V5.5L12 2.5z" />
+                                <line x1="12" y1="16.5" x2="12" y2="8.5" />
+                                <polyline points="9 11.5 12 8.5 15 11.5" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Enrollment Status</div>
+                            <div class="item-value green" id="enrollment-status">Enrolled</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3.5" y="3" width="17" height="18" rx="2.5" ry="2.5" />
+                                <line x1="12" y1="16.5" x2="12" y2="8.5" />
+                                <polyline points="9 11.5 12 8.5 15 11.5" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Agent Status</div>
+                            <div class="item-value green" id="agent-status">Connected</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Information -->
+                <div class="section">
+                    <div class="section-title">Agent Information</div>
+                    <div class="item with-divider">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2.5L4.5 5.5v5.5c0 5.2 3.2 10.1 7.5 11.5 4.3-1.4 7.5-6.3 7.5-11.5V5.5L12 2.5z" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Agent Version</div>
+                            <div class="item-value" id="agent-version">2026.1.1 Build 1082</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="18" height="18" rx="2.5" ry="2.5" />
+                                <circle cx="12" cy="12" r="2.3" />
+                                <path d="M12 7.5v1.2M12 15.3v1.2M7.5 12h1.2M15.3 12h1.2M8.8 8.8l.85.85M14.35 14.35l.85.85M8.8 15.2l.85-.85M14.35 9.65l.85-.85" stroke-width="2.2" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Active MDM API</div>
+                            <div class="item-value" id="active-mdm-api">Corporate Personal, Remote View (2.2.1.0)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Settings -->
+                <div class="section">
+                    <div class="section-title">Network Settings</div>
+                    <div class="item with-divider">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="10" r="1.4" fill="#252030" />
+                                <line x1="12" y1="11.4" x2="12" y2="20" />
+                                <path d="M8.5 7.5a5 5 0 0 0 0 5" />
+                                <path d="M15.5 7.5a5 5 0 0 1 0 5" />
+                                <path d="M5.5 5a9.2 9.2 0 0 0 0 10" />
+                                <path d="M18.5 5a9.2 9.2 0 0 1 0 10" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Cellular</div>
+                            <div class="item-value" id="cellular-value">JIO</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2.5 8.5a14 14 0 0 1 19 0" />
+                                <path d="M5.8 12.2a9.5 9.5 0 0 1 12.4 0" />
+                                <path d="M9.2 15.8a4.8 4.8 0 0 1 5.6 0" />
+                                <circle cx="12" cy="19.5" r="1.2" fill="#252030" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Wi-Fi</div>
+                            <div class="item-value" id="wifi-value">10.32.165.233</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div class="section">
+                    <div class="section-title">Troubleshooting</div>
+                    <div class="item with-divider">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="18" height="18" rx="2.5" ry="2.5" />
+                                <circle cx="7" cy="8" r="1" fill="#252030" />
+                                <line x1="10.5" y1="8" x2="16.5" y2="8" />
+                                <circle cx="7" cy="12" r="1" fill="#252030" />
+                                <line x1="10.5" y1="12" x2="16.5" y2="12" />
+                                <circle cx="7" cy="16" r="1" fill="#252030" />
+                                <line x1="10.5" y1="16" x2="16.5" y2="16" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Event Log</div>
+                            <div class="item-value" id="event-log-value">View the device event logs</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="item-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="9" />
+                                <circle cx="12" cy="9.5" r="2.8" />
+                                <path d="M6.8 17.5a6 6 0 0 1 10.4 0" />
+                            </svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-label">Agent Mode</div>
+                            <div class="item-value green" id="agent-mode-value">User</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILES TAB PANEL -->
+            <div id="profiles-panel" class="tab-panel">
+                <div class="section" style="border-bottom: none;">
+                    <div class="section-title">Mandatory</div>
+                    <div class="item clickable" onclick="openProfileDetails()" style="padding-top: 10px; padding-bottom: 12px;">
+                        <div class="item-info">
+                            <div class="item-label" style="font-size: 14.5px;">Feature Restrictions - Global</div>
+                            <div class="item-value green" style="font-size: 13px; margin-top: 2px;">Installed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PROFILE DETAILS SCREEN -->
+    <div id="screen-profile-details" class="screen">
+        <div class="profile-details-content">
+            <div class="section">
+                <div class="section-title">Profile Details</div>
+                <div class="profile-row with-divider">
+                    <div class="profile-row-label">Profile name</div>
+                    <div class="profile-row-value">Feature Restrictions - Global</div>
+                </div>
+                <div class="profile-row with-divider">
+                    <div class="profile-row-label">Description</div>
+                    <div class="profile-row-value">N/A</div>
+                </div>
+                <div class="profile-row with-divider">
+                    <div class="profile-row-label">Status</div>
+                    <div class="profile-row-value green">Installed</div>
+                </div>
+                <div class="profile-row">
+                    <div class="profile-row-label">Version</div>
+                    <div class="profile-row-value">29</div>
+                </div>
+            </div>
+
+            <div class="section" style="border-bottom: none;">
+                <div class="section-title">Configurations</div>
+                <div class="profile-row with-divider">
+                    <div class="profile-row-label">Managed Google Play</div>
+                    <div class="profile-row-value green">Installed</div>
+                </div>
+                <div class="profile-row with-divider">
+                    <div class="profile-row-label">Device Feature Control</div>
+                    <div class="profile-row-value green">Installed</div>
+                </div>
+                <div class="profile-row">
+                    <div class="profile-row-label">Authentication</div>
+                    <div class="profile-row-value green">Installed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. APP CATALOG SCREEN -->
+    <div id="screen-catalog" class="screen">
+        <div class="content">
+            <!-- GOOGLE PLAY (29) TAB -->
+            <div id="catalog-panel-play" class="tab-panel active">
+                <div class="app-list" id="app-list-container">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+
+            <!-- IN-HOUSE (0) TAB -->
+            <div id="catalog-panel-inhouse" class="tab-panel">
+                <div class="empty-state">
+                    <div class="empty-illustration">
+                        <svg viewBox="0 0 120 120" style="width: 110px; height: 110px;">
+                            <rect x="25" y="15" width="70" height="95" rx="12" fill="#d6cde8" stroke="#8c7ea3" stroke-width="2.5" />
+                            <circle cx="60" cy="24" r="2.5" fill="#8c7ea3" />
+                            <rect x="34" y="34" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="53" y="34" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="72" y="34" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="34" y="54" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="53" y="54" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="72" y="54" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="34" y="74" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="53" y="74" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <rect x="72" y="74" width="14" height="14" rx="3" fill="#b3a5cc" />
+                            <circle cx="60" cy="98" r="4" fill="#8c7ea3" />
+                        </svg>
+                    </div>
+                    <div class="empty-title">No In-House Apps</div>
+                    <div class="empty-desc">You currently don't have any In-House apps to view</div>
+                </div>
+            </div>
+
+            <!-- SOTI SNAP (0) TAB -->
+            <div id="catalog-panel-snap" class="tab-panel">
+                <div class="empty-state">
+                    <div class="empty-illustration">
+                        <svg viewBox="0 0 120 120" style="width: 110px; height: 110px;">
+                            <rect x="25" y="15" width="70" height="95" rx="12" fill="#d6cde8" stroke="#8c7ea3" stroke-width="2.5" />
+                            <circle cx="60" cy="24" r="2.5" fill="#8c7ea3" />
+                            <polygon points="60,40 75,55 60,70 45,55" fill="#b3a5cc" />
+                            <circle cx="60" cy="55" r="4" fill="#8c7ea3" />
+                            <line x1="40" y1="80" x2="80" y2="80" stroke="#8c7ea3" stroke-width="2.5" stroke-linecap="round" />
+                            <line x1="48" y1="88" x2="72" y2="88" stroke="#8c7ea3" stroke-width="2.5" stroke-linecap="round" />
+                            <circle cx="60" cy="98" r="4" fill="#8c7ea3" />
+                        </svg>
+                    </div>
+                    <div class="empty-title">No SOTI SNAP Apps</div>
+                    <div class="empty-desc">You currently don't have any SOTI SNAP apps to view</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. MESSAGE CENTER SCREEN -->
+    <div id="screen-messages" class="screen">
+        <div class="content">
+            <div class="empty-state">
+                <div class="empty-illustration">
+                    <svg viewBox="0 0 120 120" style="width: 120px; height: 120px;">
+                        <rect x="20" y="32" width="80" height="56" rx="8" fill="#d6cde8" stroke="#8c7ea3" stroke-width="2.5" />
+                        <polyline points="22,34 60,65 98,34" fill="none" stroke="#8c7ea3" stroke-width="2.5" stroke-linejoin="round" />
+                        <circle cx="60" cy="65" r="3.5" fill="#eb3c32" />
+                        <line x1="22" y1="86" x2="48" y2="60" stroke="#b3a5cc" stroke-width="2" />
+                        <line x1="98" y1="86" x2="72" y2="60" stroke="#b3a5cc" stroke-width="2" />
+                    </svg>
+                </div>
+                <div class="empty-title">No Messages</div>
+                <div class="empty-desc">You currently do not have any messages to view.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. SUPPORT SCREEN -->
+    <div id="screen-support" class="screen">
+        <div class="content">
+            <div class="empty-state">
+                <div class="empty-illustration">
+                    <svg viewBox="0 0 120 120" style="width: 120px; height: 120px;">
+                        <circle cx="60" cy="60" r="46" fill="#d6cde8" stroke="#8c7ea3" stroke-width="2.5" />
+                        <circle cx="60" cy="50" r="16" fill="#b3a5cc" stroke="#8c7ea3" stroke-width="2" />
+                        <path d="M36 88c0-13.25 10.75-22 24-22s24 8.75 24 22" fill="#b3a5cc" stroke="#8c7ea3" stroke-width="2.5" stroke-linecap="round" />
+                        <circle cx="84" cy="40" r="8" fill="#2b6bab" />
+                        <text x="84" y="44" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">?</text>
+                    </svg>
+                </div>
+                <div class="empty-title">No Support Information</div>
+                <div class="empty-desc">There is no support information available as of now</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. PRIVACY SCREEN -->
+    <div id="screen-privacy" class="screen">
+        <div class="content">
+            <div class="privacy-content">
+                <div class="privacy-text">
+                    The SOTI MobiControl Agent collects, uses, and transmits/discloses your information (including device identifiers) in accordance with SOTI's privacy policy.
+                </div>
+                <button type="button" class="privacy-btn" onclick="openPrivacyPolicy()">PRIVACY POLICY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Knox Work Profile Badge (Samsung devices only) -->
     <div class="work-badge" id="work-badge">
         <svg viewBox="0 0 24 24">
             <rect x="3.5" y="7" width="17" height="13" rx="2.5" ry="2.5" fill="#1565c0" />
@@ -682,11 +1302,11 @@
             <div class="name-modal-title">Edit Device Information</div>
             <div class="name-modal-sub">Customize username and hardware serial number:</div>
             <label style="display:block; font-size:12px; font-weight:600; color:#5c4e70; margin-bottom:4px;">User Name</label>
-            <input type="text" id="name-modal-input" class="name-modal-input" style="margin-bottom:12px;" placeholder="e.g. HardikParjapati" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <input type="text" id="name-modal-input" class="name-modal-input" style="margin-bottom:12px;" placeholder="e.g. Jay_Parmar" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
             <label style="display:block; font-size:12px; font-weight:600; color:#5c4e70; margin-bottom:4px;">Hardware Serial Number</label>
-            <input type="text" id="serial-modal-input" class="name-modal-input" placeholder="e.g. 41241FDEE00000" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <input type="text" id="serial-modal-input" class="name-modal-input" placeholder="e.g. 62061XEBF2Q0AE" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
             <div style="font-size:11px; color:#887b9c; margin-top:4px; margin-bottom:14px;">From Settings → About phone → Model &amp; hardware → Serial number</div>
-            <div class="name-modal-preview" id="name-modal-preview">C295-FAL_878238_HardikParjapati_...</div>
+            <div class="name-modal-preview" id="name-modal-preview">C295-FAL_13985-Jay_Parmar_...</div>
             <div class="name-modal-actions">
                 <button type="button" class="name-modal-btn cancel" onclick="closeNameModal()">Cancel</button>
                 <button type="button" class="name-modal-btn save" onclick="saveName()">Save</button>
@@ -695,11 +1315,178 @@
     </div>
 
     <script>
-        const ID_PREFIX = 'C295-FAL_878238_';
+        const ID_PREFIX = 'C295-FAL_13985-';
+        let currentScreen = 'config';
+        let currentConfigTab = 'device';
+        let currentCatalogTab = 'play';
 
-        // Auto-fetch device hardware serial number
+        // Google Play Apps list (29 apps total as shown in Pixel 9a reference)
+        const GOOGLE_PLAY_APPS = [
+            { name: "Contacts", badge: "Mandatory", action: "OPEN" },
+            { name: "Gboard - the Google Keyboard", badge: "Mandatory", action: "OPEN" },
+            { name: "Gmail", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Calendar", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Chat", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Docs", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Drive", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Keep - Notes and lists", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Maps", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Meet", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Chrome: Fast & Secure", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Photos", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Sheets", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Slides", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Translate", badge: "New", action: "OPEN" },
+            { name: "Files by Google", badge: "Mandatory", action: "OPEN" },
+            { name: "Calculator", badge: "Mandatory", action: "OPEN" },
+            { name: "Clock", badge: "Mandatory", action: "OPEN" },
+            { name: "Pixel Camera", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Play Store", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Pixel Buds", badge: "New", action: "FREE" },
+            { name: "Android System WebView", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Play services", badge: "Mandatory", action: "OPEN" },
+            { name: "Settings Suggestions", badge: "Mandatory", action: "OPEN" },
+            { name: "Google Connectivity Services", badge: "Mandatory", action: "OPEN" },
+            { name: "Carrier Services", badge: "Mandatory", action: "OPEN" },
+            { name: "Private Compute Services", badge: "Mandatory", action: "OPEN" },
+            { name: "Android Device Policy", badge: "Mandatory", action: "OPEN" },
+            { name: "SOTI MobiControl", badge: "Mandatory", action: "OPEN" }
+        ];
+
+        function renderAppCatalogList() {
+            const container = document.getElementById('app-list-container');
+            if (!container) return;
+            container.innerHTML = GOOGLE_PLAY_APPS.map(app => `
+                <div class="app-item">
+                    <div class="app-icon">
+                        <svg viewBox="0 0 24 24" fill="#2b6bab">
+                            <path d="M12 2a2 2 0 0 1 2 2v1.07A8 8 0 0 1 20 13v6a2 2 0 0 1-2 2h-1v-5a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v5H6a2 2 0 0 1-2-2v-6a8 8 0 0 1 6-7.93V4a2 2 0 0 1 2-2z"/>
+                            <circle cx="8.5" cy="11.5" r="1.5" fill="#ffffff"/>
+                            <circle cx="15.5" cy="11.5" r="1.5" fill="#ffffff"/>
+                        </svg>
+                    </div>
+                    <div class="app-info">
+                        <div class="app-title">${app.name}</div>
+                        <div class="app-version">Version: Varies with device</div>
+                        <span class="app-badge ${app.badge === 'New' ? 'new' : ''}">${app.badge}</span>
+                    </div>
+                    <button type="button" class="app-action-btn">${app.action}</button>
+                </div>
+            `).join('');
+        }
+
+        // Navigation and screen management
+        function showScreen(screenId) {
+            currentScreen = screenId;
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const targetScreen = document.getElementById(`screen-${screenId}`);
+            if (targetScreen) targetScreen.classList.add('active');
+
+            const headerEl = document.getElementById('app-header');
+            const menuBtn = document.getElementById('menu-btn');
+            const backBtn = document.getElementById('back-btn');
+            const headerTitle = document.getElementById('header-title');
+            const headerActions = document.getElementById('header-actions');
+            const configTabs = document.getElementById('config-tabs');
+            const catalogTabs = document.getElementById('catalog-tabs');
+
+            // Reset header styling
+            headerEl.classList.remove('dark-header');
+            menuBtn.style.display = 'flex';
+            backBtn.style.display = 'none';
+            headerActions.style.display = 'none';
+            configTabs.style.display = 'none';
+            catalogTabs.style.display = 'none';
+
+            // Update Drawer active row
+            document.querySelectorAll('.drawer-item').forEach(item => item.classList.remove('active'));
+
+            if (screenId === 'config') {
+                document.getElementById('nav-item-config')?.classList.add('active');
+                configTabs.style.display = 'flex';
+                headerTitle.textContent = currentConfigTab === 'device' ? 'Device Configuration' : 'Configuration Profiles';
+            } else if (screenId === 'profile-details') {
+                headerEl.classList.add('dark-header');
+                menuBtn.style.display = 'none';
+                backBtn.style.display = 'flex';
+                headerTitle.textContent = 'Profile details';
+            } else if (screenId === 'catalog') {
+                document.getElementById('nav-item-catalog')?.classList.add('active');
+                catalogTabs.style.display = 'flex';
+                headerActions.style.display = 'flex';
+                headerTitle.textContent = 'App Catalog';
+            } else if (screenId === 'messages') {
+                document.getElementById('nav-item-messages')?.classList.add('active');
+                headerTitle.textContent = 'Message Center';
+            } else if (screenId === 'support') {
+                document.getElementById('nav-item-support')?.classList.add('active');
+                headerTitle.textContent = 'Support';
+            } else if (screenId === 'privacy') {
+                document.getElementById('nav-item-privacy')?.classList.add('active');
+                headerTitle.textContent = 'Privacy';
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function openDrawer() {
+            document.getElementById('drawer')?.classList.add('open');
+            document.getElementById('drawer-backdrop')?.classList.add('open');
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawer')?.classList.remove('open');
+            document.getElementById('drawer-backdrop')?.classList.remove('open');
+        }
+
+        function selectDrawerScreen(screenId) {
+            closeDrawer();
+            setTimeout(() => {
+                showScreen(screenId);
+            }, 120);
+        }
+
+        function openProfileDetails() {
+            showScreen('profile-details');
+        }
+
+        function navigateBack() {
+            showScreen('config');
+            switchConfigTab('profiles');
+        }
+
+        function openPrivacyPolicy() {
+            window.open('https://www.soti.net/privacy', '_blank');
+        }
+
+        // Tab Switching for Configuration
+        function switchConfigTab(tab) {
+            currentConfigTab = tab;
+            document.getElementById('tab-btn-device')?.classList.toggle('active', tab === 'device');
+            document.getElementById('tab-btn-profiles')?.classList.toggle('active', tab === 'profiles');
+            document.getElementById('device-panel')?.classList.toggle('active', tab === 'device');
+            document.getElementById('profiles-panel')?.classList.toggle('active', tab === 'profiles');
+
+            const headerTitle = document.getElementById('header-title');
+            if (headerTitle) {
+                headerTitle.textContent = tab === 'device' ? 'Device Configuration' : 'Configuration Profiles';
+            }
+        }
+
+        // Tab Switching for App Catalog
+        function switchCatalogTab(tab) {
+            currentCatalogTab = tab;
+            document.getElementById('tab-btn-play')?.classList.toggle('active', tab === 'play');
+            document.getElementById('tab-btn-inhouse')?.classList.toggle('active', tab === 'inhouse');
+            document.getElementById('tab-btn-snap')?.classList.toggle('active', tab === 'snap');
+
+            document.getElementById('catalog-panel-play')?.classList.toggle('active', tab === 'play');
+            document.getElementById('catalog-panel-inhouse')?.classList.toggle('active', tab === 'inhouse');
+            document.getElementById('catalog-panel-snap')?.classList.toggle('active', tab === 'snap');
+        }
+
+        // Hardware Serial & Fingerprinting
         function getDeviceSerial(model) {
-            // 1. Check for URL parameter ?serial= or ?sn=
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 const qSerial = urlParams.get('serial') || urlParams.get('sn');
@@ -710,65 +1497,39 @@
                 }
             } catch (e) { }
 
-            // 2. Check for user-configured custom hardware serial
             const customSerial = localStorage.getItem('mdm_custom_serial');
             if (customSerial && customSerial.trim()) {
                 return customSerial.trim();
             }
 
-            // 3. Check for native Android / Knox WebView interface
             if (window.Android && typeof window.Android.getSerialNumber === 'function') {
                 try {
                     const sn = window.Android.getSerialNumber();
                     if (sn) return sn;
                 } catch(e) {}
             }
-            if (window.KnoxBridge && typeof window.KnoxBridge.getSerial === 'function') {
-                try {
-                    const sn = window.KnoxBridge.getSerial();
-                    if (sn) return sn;
-                } catch(e) {}
-            }
 
-            // 4. Return cached hardware serial if model matches
             const cachedModel = localStorage.getItem('mdm_serial_model');
             const cached = localStorage.getItem('mdm_auto_serial');
             if (cached && cachedModel === model) return cached;
 
-            // 3. Generate deterministic hardware fingerprint from device parameters
+            const m = (model || '').toLowerCase();
+            if (m.includes('pixel')) {
+                const pixelSerial = '62061XEBF2Q0AE';
+                localStorage.setItem('mdm_auto_serial', pixelSerial);
+                localStorage.setItem('mdm_serial_model', model);
+                return pixelSerial;
+            }
+
+            // Fingerprint for Samsung & others
             const entropy = [
                 model,
                 navigator.userAgent,
                 navigator.hardwareConcurrency || 8,
-                navigator.deviceMemory || 8,
-                screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
+                screen.width + 'x' + screen.height,
                 window.devicePixelRatio || 2,
-                Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
-                navigator.language || 'en-US'
+                Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata'
             ];
-
-            try {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = "14px 'Arial'";
-                ctx.fillText('MDM_SERIAL_SEED', 2, 2);
-                entropy.push(canvas.toDataURL());
-            } catch(e) {}
-
-            try {
-                const glCanvas = document.createElement('canvas');
-                const gl = glCanvas.getContext('webgl') || glCanvas.getContext('experimental-webgl');
-                if (gl) {
-                    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-                    if (dbg) {
-                        entropy.push(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '');
-                        entropy.push(gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) || '');
-                    }
-                }
-            } catch(e) {}
-
-            // Deterministic hash
             const str = entropy.join('###');
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -776,18 +1537,7 @@
                 hash |= 0;
             }
             const absHash = Math.abs(hash);
-
-            // Construct 11-character authentic manufacturer serial
             const chars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-            const m = (model || '').toLowerCase();
-            let prefix = 'RZ8';
-            if (m.includes('pixel')) prefix = 'HT';
-            else if (m.includes('oneplus') || m.includes('cph') || m.includes('oppo')) prefix = 'CP';
-            else if (m.includes('xiaomi') || m.includes('redmi') || m.includes('poco')) prefix = 'XM';
-            else if (m.includes('moto')) prefix = 'ZY';
-            else if (m.includes('vivo') || m.includes('iqoo')) prefix = 'VV';
-            else if (m.includes('samsung') || m.includes('sm-')) prefix = 'RZ8';
-
             let seed = absHash;
             let middle = '';
             for (let i = 0; i < 6; i++) {
@@ -795,7 +1545,7 @@
                 seed = Math.floor(seed / 5) + (seed * 11) + (i * 7);
                 seed = Math.abs(seed);
             }
-            const generatedSerial = `${prefix}${middle}TT`;
+            const generatedSerial = `RZ8${middle}TT`;
 
             localStorage.setItem('mdm_auto_serial', generatedSerial);
             localStorage.setItem('mdm_serial_model', model);
@@ -812,23 +1562,27 @@
                     return clean;
                 }
             } catch (e) { }
-            return localStorage.getItem('mdm_username') || 'HardikParjapati';
+            return localStorage.getItem('mdm_username') || 'Jay_Parmar';
         }
 
         function formatDeviceIdentifier(username) {
             const name = username || getSavedUsername();
-            const currentModel = document.getElementById('device-model')?.textContent || 'SAMSUNG-SM-M515F';
+            const currentModel = document.getElementById('device-model')?.textContent || 'GOOGLE-Pixel 9a';
             const serial = getDeviceSerial(currentModel);
             return `${ID_PREFIX}${name}_${serial}`;
         }
 
         function updateDeviceNameDisplay() {
-            document.getElementById('device-name').textContent = formatDeviceIdentifier();
+            const id = formatDeviceIdentifier();
+            const nameEl = document.getElementById('device-name');
+            const drawerNameEl = document.getElementById('drawer-device-name');
+            if (nameEl) nameEl.textContent = id;
+            if (drawerNameEl) drawerNameEl.textContent = id;
         }
 
         function openNameModal() {
             const current = getSavedUsername();
-            const currentModel = document.getElementById('device-model')?.textContent || 'SAMSUNG-SM-M515F';
+            const currentModel = document.getElementById('device-model')?.textContent || 'GOOGLE-Pixel 9a';
             const currentSerial = getDeviceSerial(currentModel);
 
             const nameInput = document.getElementById('name-modal-input');
@@ -838,7 +1592,7 @@
             serialInput.value = currentSerial;
 
             updateNamePreview();
-            document.getElementById('name-modal-overlay').classList.add('open');
+            document.getElementById('name-modal-overlay')?.classList.add('open');
             setTimeout(() => {
                 nameInput.focus();
                 nameInput.select();
@@ -847,7 +1601,7 @@
 
         function closeNameModal(event) {
             if (event && event.target !== event.currentTarget) return;
-            document.getElementById('name-modal-overlay').classList.remove('open');
+            document.getElementById('name-modal-overlay')?.classList.remove('open');
         }
 
         function updateNamePreview() {
@@ -870,34 +1624,21 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && document.getElementById('name-modal-overlay')?.classList.contains('open')) {
-                saveName();
-            } else if (e.key === 'Escape' && document.getElementById('name-modal-overlay')?.classList.contains('open')) {
+            if (e.key === 'Escape') {
                 closeNameModal();
+                closeDrawer();
+            } else if (e.key === 'Enter' && document.getElementById('name-modal-overlay')?.classList.contains('open')) {
+                saveName();
             }
         });
 
-        // Tab switching
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-
-            if (tab === 'device') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('device-panel').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('profiles-panel').classList.add('active');
-            }
-        }
-
-        // Accurate Android OS baseline resolution (countering Chrome's frozen Android 10 User-Agent reduction)
+        // Compute Android Version based on model
         function getAccurateAndroidVersion(model, currentOs) {
             const m = (model || '').toLowerCase();
             const num = parseInt((currentOs || '').replace(/Android\s*/i, ''), 10);
 
-            // Google Pixel series native OS
-            if (m.includes('pixel 9') || m.includes('pixel 9a') || m.includes('pixel 9 pro')) return 'Android 15';
+            // Google Pixel 9 series per Pixel 9a reference
+            if (m.includes('pixel 9') || m.includes('pixel 9a') || m.includes('pixel 9 pro')) return 'Android 17';
             if (m.includes('pixel 8')) return 'Android 14';
             if (m.includes('pixel 7')) return 'Android 14';
             if (m.includes('pixel 6')) return 'Android 13';
@@ -910,34 +1651,29 @@
             if (m.includes('m51')) return 'Android 12';
             if (m.includes('a54') || m.includes('a55')) return 'Android 14';
 
-            // If num is realistic and extracted (11-16)
-            if (!isNaN(num) && num > 10 && num <= 16) {
+            if (!isNaN(num) && num > 10 && num <= 17) {
                 return `Android ${num}`;
             }
 
-            // On modern devices where Chrome UA reduction froze OS to Android 10
-            if (num === 10 || /Android/i.test(navigator.userAgent)) {
-                return 'Android 15';
-            }
-
-            return currentOs || 'Android 15';
+            return 'Android 17';
         }
 
-        // Compute Knox or Brand Enterprise API based on hardware model & Android version
+        // Compute MDM API
         function computeEnterpriseApi(model, osVersion) {
-            const osMatch = osVersion.match(/Android\s*(\d+)/i);
-            const androidVer = osMatch ? parseInt(osMatch[1], 10) : 15;
-            const m = model.toLowerCase();
+            const m = (model || '').toLowerCase();
+
+            // Pixel per updated photo: Corporate Personal, Remote View (2.2.1.0)
+            if (m.includes('pixel')) {
+                return 'Corporate Personal, Remote View (2.2.1.0)';
+            }
 
             // Samsung Device (Hardware Knox)
             if (m.includes('samsung') || m.includes('sm-') || m.includes('galaxy')) {
+                const osMatch = osVersion.match(/Android\s*(\d+)/i);
+                const androidVer = osMatch ? parseInt(osMatch[1], 10) : 14;
                 let knoxVer = '3.10';
                 let mdmVer = '6.0';
-
-                if (androidVer >= 15) {
-                    knoxVer = '3.11';
-                    mdmVer = '6.1';
-                } else if (androidVer === 14) {
+                if (androidVer >= 14) {
                     knoxVer = '3.10';
                     mdmVer = '6.0';
                 } else if (androidVer === 13) {
@@ -946,251 +1682,134 @@
                 } else if (androidVer === 12) {
                     knoxVer = m.includes('m515f') ? '3.4' : '3.8';
                     mdmVer = '5.7';
-                } else if (androidVer === 11) {
-                    knoxVer = '3.7';
-                    mdmVer = '5.7';
-                } else if (androidVer <= 10) {
-                    knoxVer = '3.5';
-                    mdmVer = '5.5';
                 }
-
                 return `Samsung MDM ${mdmVer}, Samsung KNOX ${knoxVer}, Corporate<br>Personal, RC1 (2.3.0.0)`;
             }
 
-            // Google Pixel - Corporate Personal per SOTI MDM specification
-            if (m.includes('pixel')) {
-                return `Android Enterprise ${androidVer}.0, Work Profile API, Corporate<br>Personal, RC1 (2.3.0.0)`;
-            }
-
-            // Motorola ThinkShield
-            if (m.includes('moto') || m.includes('edge') || m.includes('thinkphone')) {
-                return `Motorola ThinkShield 4.0, Android Enterprise, Corporate<br>Personal, RC1 (2.3.0.0)`;
-            }
-
-            // OnePlus / OPPO
-            if (m.includes('oneplus') || m.includes('cph') || m.includes('oppo')) {
-                return `OnePlus Enterprise 3.0, Android Enterprise, Corporate<br>Personal, RC1 (2.3.0.0)`;
-            }
-
-            // Xiaomi / Redmi
-            if (m.includes('xiaomi') || m.includes('redmi') || m.includes('poco')) {
-                return `Xiaomi Enterprise Solution 2.0, Android Enterprise, Corporate<br>Personal, RC1 (2.3.0.0)`;
-            }
-
-            // Zebra Rugged
-            if (m.includes('zebra') || m.includes('tc5') || m.includes('tc7')) {
-                return `Zebra MX 13.1, Android Management API, Corporate<br>Personal, RC1 (2.3.0.0)`;
-            }
-
-            // Standard Android Enterprise fallback
-            const apiLevel = androidVer >= 15 ? 35 : (androidVer === 14 ? 34 : (androidVer === 13 ? 33 : 31));
-            return `Android Enterprise API Level ${apiLevel}, Work Profile, Corporate<br>Personal, RC1 (2.3.0.0)`;
+            return 'Corporate Personal, Remote View (2.2.1.0)';
         }
 
-        // Normalize ISP/Carrier name without hardcoded placeholder fallbacks
         function normalizeCarrier(rawIsp) {
             if (!rawIsp) return '';
             const s = rawIsp.toLowerCase();
-            if (s.includes('jio') || s.includes('reliance')) return 'Jio';
-            if (s.includes('airtel') || s.includes('bharti')) return 'Airtel';
-            if (s.includes('vodafone') || s.includes('idea') || s.includes('vil')) return 'Vodafone Idea';
+            if (s.includes('jio') || s.includes('reliance')) return 'JIO';
+            if (s.includes('airtel') || s.includes('bharti')) return 'AIRTEL';
+            if (s.includes('vodafone') || s.includes('idea') || s.includes('vil')) return 'VI';
             if (s.includes('bsnl')) return 'BSNL';
-            if (s.includes('verizon')) return 'Verizon';
+            if (s.includes('verizon')) return 'VERIZON';
             if (s.includes('at&t') || s.includes('att')) return 'AT&T';
-            if (s.includes('t-mobile') || s.includes('tmobile')) return 'T-Mobile';
-            if (s.includes('orange')) return 'Orange';
-            if (s.includes('claro')) return 'Claro';
-            if (s.includes('o2') || s.includes('telefonica')) return 'O2';
-            if (s.includes('ee')) return 'EE';
-            return rawIsp.split(',')[0].replace(/\b(ltd|inc|llc|gmbh|sa|corp|telecom|communications|broadband|wireless)\b/gi, '').trim();
+            if (s.includes('t-mobile') || s.includes('tmobile')) return 'T-MOBILE';
+            return rawIsp.split(',')[0].replace(/\b(ltd|inc|llc|gmbh|sa|corp|telecom|communications|broadband|wireless)\b/gi, '').trim().toUpperCase();
         }
 
-        // Automatic Device & Hardware Detection with Client Hints and deep mobile UA analysis
+        // Automatic Device Detection
         async function autoDetectAndApplyDevice() {
             const ua = navigator.userAgent;
             let detectedModel = '';
             let detectedOs = '';
 
-            // 1. Query High-Entropy Client Hints (Chrome / Edge / Chromium on Android)
+            // Query High-Entropy Client Hints
             if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
                 try {
                     const hints = await navigator.userAgentData.getHighEntropyValues([
                         'model',
-                        'platformVersion',
-                        'fullVersionList',
-                        'architecture'
+                        'platformVersion'
                     ]);
                     if (hints.model && hints.model !== 'K') {
                         detectedModel = hints.model;
                     }
-                    const isAndroidPlatform = (navigator.userAgentData && navigator.userAgentData.platform === 'Android') || /Android/i.test(ua);
-                    if (hints.platformVersion && isAndroidPlatform) {
+                    if (hints.platformVersion) {
                         const major = parseInt(hints.platformVersion, 10);
-                        if (!isNaN(major) && major >= 9 && major <= 16) {
+                        if (!isNaN(major) && major >= 9 && major <= 17) {
                             detectedOs = `Android ${major}`;
                         }
                     }
                 } catch (e) { }
             }
 
-            // 2. Deep User-Agent Model & OS Detection (Samsung Internet, Firefox, Android WebView, Opera)
+            // User-Agent inspection
             if (!detectedOs) {
                 const osMatch = ua.match(/Android\s*([0-9]+(?:\.[0-9]+)?)/i);
                 if (osMatch) {
-                    const major = parseInt(osMatch[1], 10);
-                    detectedOs = `Android ${major}`;
+                    detectedOs = `Android ${parseInt(osMatch[1], 10)}`;
                 }
             }
 
             if (!detectedModel) {
-                const samsungMatch = ua.match(/;\s*(SM-[A-Z0-9]+)/i);
                 const pixelMatch = ua.match(/;\s*(Pixel[A-Za-z0-9\s]+?)(?:\s+Build|[;)])/i);
-                const cphMatch = ua.match(/;\s*(CPH[0-9]+|OnePlus[A-Za-z0-9\s]+?)(?:\s+Build|[;)])/i);
-                const xiaomiMatch = ua.match(/;\s*(2[0-9]{3}[A-Z0-9]+|Redmi[A-Za-z0-9\s]+|POCO[A-Za-z0-9\s]+|Mi\s*[A-Za-z0-9\s]+?)(?:\s+Build|[;)])/i);
-                const genericMatch = ua.match(/;\s*([^;]+?)\s+Build\//i);
-
-                if (samsungMatch) {
-                    detectedModel = samsungMatch[1];
-                } else if (pixelMatch) {
+                const samsungMatch = ua.match(/;\s*(SM-[A-Z0-9]+)/i);
+                if (pixelMatch) {
                     detectedModel = pixelMatch[1];
-                } else if (cphMatch) {
-                    detectedModel = cphMatch[1];
-                } else if (xiaomiMatch) {
-                    detectedModel = xiaomiMatch[1];
-                } else if (genericMatch) {
-                    const raw = genericMatch[1].replace(/Linux;\s*Android[^;]*;\s*/i, '').trim();
-                    if (raw && raw !== 'K' && !/wv/i.test(raw)) {
-                        detectedModel = raw;
-                    }
+                } else if (samsungMatch) {
+                    detectedModel = samsungMatch[1];
                 }
             }
 
-            // 3. Fallback / Normalization
+            // Default to Pixel 9a as requested
             const isAndroid = /Android/i.test(ua) || (navigator.userAgentData && navigator.userAgentData.platform === 'Android');
-
-            if (!isAndroid && (!detectedModel || /windows|macintosh|linux/i.test(detectedModel))) {
-                // Desktop browser preview
-                detectedModel = 'SAMSUNG-SM-M515F';
-                detectedOs = 'Android 12';
-            } else {
-                if (!detectedModel) {
-                    // Try GPU hardware inspection
-                    let gpuRenderer = '';
-                    try {
-                        const gl = document.createElement('canvas').getContext('webgl');
-                        if (gl) {
-                            const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-                            if (dbg) {
-                                gpuRenderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '';
-                            }
-                        }
-                    } catch (e) { }
-
-                    if (/Adreno\s*7/i.test(gpuRenderer)) {
-                        detectedModel = 'SAMSUNG-SM-S928B';
-                    } else if (/Adreno/i.test(gpuRenderer)) {
-                        detectedModel = 'SAMSUNG-SM-A546B';
-                    } else {
-                        detectedModel = 'SAMSUNG-SM-M515F';
-                    }
-                }
-
-                // Format model with manufacturer prefix
-                if (/samsung|sm-/i.test(detectedModel)) {
-                    if (!detectedModel.startsWith('SAMSUNG-')) {
-                        detectedModel = 'SAMSUNG-' + detectedModel.replace(/^Samsung\s*/i, '');
-                    }
-                } else if (/pixel/i.test(detectedModel)) {
-                    detectedModel = detectedModel.replace(/^Google\s*/i, '');
-                    if (!/^Pixel/i.test(detectedModel)) {
-                        detectedModel = 'Pixel ' + detectedModel;
-                    }
-                } else if (/cph|oneplus/i.test(detectedModel)) {
-                    if (!detectedModel.startsWith('ONEPLUS-')) {
-                        detectedModel = 'ONEPLUS-' + detectedModel.replace(/^OnePlus\s*/i, '');
-                    }
-                }
-
-                detectedOs = getAccurateAndroidVersion(detectedModel, detectedOs);
+            if (!isAndroid || !detectedModel) {
+                detectedModel = 'Pixel 9a';
+                detectedOs = 'Android 17';
             }
 
-            // Update DOM Model & OS
+            // Prefix formatting
+            let cleanSubModel = detectedModel;
+            if (/pixel/i.test(detectedModel)) {
+                cleanSubModel = detectedModel.replace(/^Google\s*/i, '');
+                detectedModel = 'GOOGLE-' + cleanSubModel;
+            } else if (/samsung|sm-/i.test(detectedModel)) {
+                cleanSubModel = detectedModel.replace(/^Samsung\s*/i, '');
+                if (!detectedModel.startsWith('SAMSUNG-')) {
+                    detectedModel = 'SAMSUNG-' + cleanSubModel;
+                }
+            }
+
+            detectedOs = getAccurateAndroidVersion(detectedModel, detectedOs);
+
+            // Update DOM
             document.getElementById('device-model').textContent = detectedModel;
             document.getElementById('device-os').textContent = detectedOs;
+            document.getElementById('drawer-device-sub').textContent = cleanSubModel;
 
-            // 4. Update Active MDM API (Knox / Enterprise API)
+            // MDM API
             const apiText = computeEnterpriseApi(detectedModel, detectedOs);
             document.getElementById('active-mdm-api').innerHTML = apiText;
 
-            // 5. Update Device Identifier & Serial with detected model
-            updateDeviceNameDisplay();
-
-            // 6. Work Profile Badge visibility
+            // Knox Badge: Only Samsung devices show Knox badge
             const badgeEl = document.getElementById('work-badge');
             if (badgeEl) {
-                const isZebra = detectedModel.toLowerCase().includes('zebra');
-                badgeEl.style.display = isZebra ? 'none' : 'flex';
+                const isSamsung = detectedModel.toLowerCase().includes('samsung') || detectedModel.toLowerCase().includes('sm-');
+                badgeEl.style.display = isSamsung ? 'flex' : 'none';
             }
+
+            updateDeviceNameDisplay();
         }
 
-        // Automatic Cellular and Wi-Fi Detection without placeholder hardcoding
+        // Cellular and Wi-Fi Details
         async function autoUpdateNetworkDetails() {
             const isOnline = navigator.onLine !== false;
-            let cellularDisplay = 'Connected';
-            let wifiDisplay = 'Wi-Fi is turned off';
-
-            if (navigator.connection) {
-                const conn = navigator.connection;
-                if (conn.type === 'wifi') {
-                    wifiDisplay = 'Connected';
-                } else if (conn.type === 'cellular') {
-                    wifiDisplay = 'Wi-Fi is turned off';
-                }
-            }
+            let cellularDisplay = 'JIO';
+            let wifiDisplay = '10.32.165.233';
 
             if (!isOnline) {
                 cellularDisplay = 'No Service';
                 wifiDisplay = 'Wi-Fi is turned off';
             } else {
                 let detectedCarrier = '';
-                // 1. Primary lookup via ipwho.is
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2500);
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
                     const res = await fetch('https://ipwho.is/', { signal: controller.signal });
                     clearTimeout(timeoutId);
                     if (res.ok) {
                         const data = await res.json();
                         const isp = data.connection && data.connection.isp ? data.connection.isp : data.isp;
-                        if (isp) {
-                            detectedCarrier = normalizeCarrier(isp);
-                        }
+                        if (isp) detectedCarrier = normalizeCarrier(isp);
                     }
                 } catch (e) { }
 
-                // 2. Secondary lookup via ipapi.co
-                if (!detectedCarrier) {
-                    try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 2500);
-                        const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
-                        clearTimeout(timeoutId);
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.org) {
-                                detectedCarrier = normalizeCarrier(data.org);
-                            }
-                        }
-                    } catch (e) { }
-                }
-
                 if (detectedCarrier) {
                     cellularDisplay = detectedCarrier;
-                } else if (navigator.connection && navigator.connection.effectiveType) {
-                    const eff = navigator.connection.effectiveType.toUpperCase();
-                    cellularDisplay = eff === '4G' ? '4G LTE' : (eff === '5G' ? '5G' : `${eff} Network`);
-                } else {
-                    cellularDisplay = 'Connected';
                 }
             }
 
@@ -1198,20 +1817,17 @@
             document.getElementById('wifi-value').textContent = wifiDisplay;
         }
 
-        // Real-time listeners for network changes
         window.addEventListener('online', autoUpdateNetworkDetails);
         window.addEventListener('offline', autoUpdateNetworkDetails);
-        if (navigator.connection) {
-            navigator.connection.addEventListener('change', autoUpdateNetworkDetails);
-        }
 
-        // Run auto-fetch on load
+        // Initialize
+        renderAppCatalogList();
         autoDetectAndApplyDevice();
         autoUpdateNetworkDetails();
 
-        // Register service worker with instant real-time update handling
+        // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=5').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=6').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
