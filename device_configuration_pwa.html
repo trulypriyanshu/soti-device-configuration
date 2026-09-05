@@ -260,8 +260,8 @@
         }
 
         .item-icon {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -269,11 +269,11 @@
         }
 
         .item-icon svg {
-            width: 21px;
-            height: 21px;
+            width: 25px;
+            height: 25px;
             stroke: #4e4461;
             fill: none;
-            stroke-width: 1.7;
+            stroke-width: 1.85;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
@@ -1832,7 +1832,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=7').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=8').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
