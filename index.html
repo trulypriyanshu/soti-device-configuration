@@ -1600,6 +1600,12 @@
         function getSavedBrand() {
             const saved = localStorage.getItem('mdm_device_brand');
             if (saved && saved.trim()) return saved.trim().toUpperCase();
+            if (window.Android && typeof window.Android.getBrand === 'function') {
+                try {
+                    const b = window.Android.getBrand();
+                    if (b && b !== 'UNKNOWN') return b.trim().toUpperCase();
+                } catch(e) {}
+            }
             const currentModel = document.getElementById('device-model')?.textContent || 'GOOGLE-Pixel 9a';
             if (currentModel.includes('-')) return currentModel.split('-')[0].toUpperCase();
             return 'GOOGLE';
@@ -1608,6 +1614,12 @@
         function getSavedModelName() {
             const saved = localStorage.getItem('mdm_device_model_name');
             if (saved && saved.trim()) return saved.trim();
+            if (window.Android && typeof window.Android.getModel === 'function') {
+                try {
+                    const m = window.Android.getModel();
+                    if (m && m !== 'Android Device') return m.trim();
+                } catch(e) {}
+            }
             const currentModel = document.getElementById('device-model')?.textContent || 'GOOGLE-Pixel 9a';
             if (currentModel.includes('-')) return currentModel.split('-').slice(1).join('-');
             return 'Pixel 9a';
@@ -1880,9 +1892,35 @@
             const savedModelName = localStorage.getItem('mdm_device_model_name');
             let cleanSubModel = detectedModel;
 
+            // Check if running in Native Android WebView Bridge
+            let nativeBrand = '';
+            let nativeModel = '';
+            let nativeOs = '';
+            let nativeSerial = '';
+            if (window.Android) {
+                try {
+                    let info = {};
+                    if (typeof window.Android.getDeviceInfoJson === 'function') {
+                        info = JSON.parse(window.Android.getDeviceInfoJson());
+                    }
+                    nativeBrand = info.brand || (typeof window.Android.getBrand === 'function' ? window.Android.getBrand() : '');
+                    nativeModel = info.model || (typeof window.Android.getModel === 'function' ? window.Android.getModel() : '');
+                    nativeOs = info.androidVersion || (typeof window.Android.getAndroidVersion === 'function' ? window.Android.getAndroidVersion() : '');
+                    nativeSerial = info.serial || (typeof window.Android.getSerialNumber === 'function' ? window.Android.getSerialNumber() : '');
+                } catch (e) { }
+            }
+
             if (savedBrand && savedModelName) {
                 detectedModel = `${savedBrand.toUpperCase()}-${savedModelName}`;
                 cleanSubModel = savedModelName;
+            } else if (nativeModel) {
+                const b = (nativeBrand && nativeBrand !== 'UNKNOWN') ? nativeBrand.toUpperCase() : 'GOOGLE';
+                detectedModel = `${b}-${nativeModel}`;
+                cleanSubModel = nativeModel;
+                if (nativeOs) detectedOs = nativeOs;
+                if (nativeSerial && !localStorage.getItem('mdm_custom_serial')) {
+                    localStorage.setItem('mdm_custom_serial', nativeSerial.toUpperCase());
+                }
             } else {
                 // Default to Pixel 9a as requested
                 const isAndroid = /Android/i.test(ua) || (navigator.userAgentData && navigator.userAgentData.platform === 'Android');
