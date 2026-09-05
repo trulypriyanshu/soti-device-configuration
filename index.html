@@ -85,10 +85,10 @@
 
         .menu-badge-dot {
             position: absolute;
-            top: 0px;
-            right: 1px;
-            width: 7px;
-            height: 7px;
+            top: -1px;
+            right: 0px;
+            width: 9.5px;
+            height: 9.5px;
             background: #eb3c32;
             border-radius: 50%;
             border: 1.5px solid #2b6bab;
@@ -1825,7 +1825,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=11').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=12').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
