@@ -1072,7 +1072,7 @@
                             <div class="item-value" id="cellular-value">JIO</div>
                         </div>
                     </div>
-                    <div class="item">
+                    <div class="item" onclick="toggleWifiDisplayMode()" style="cursor: pointer;" title="Tap to toggle between IP and MAC address">
                         <div class="item-icon">
                             <svg viewBox="0 0 24 24">
                                 <path d="M2.5 8.5a14 14 0 0 1 19 0" />
@@ -1515,19 +1515,35 @@
                 if (qSerial && qSerial.trim()) {
                     const clean = qSerial.trim().toUpperCase();
                     localStorage.setItem('mdm_custom_serial', clean);
+                    localStorage.setItem('mdm_user_override_serial', 'true');
                     return clean;
                 }
             } catch (e) { }
 
+            // 1. Native Android hardware bridge has top priority for auto-detection
+            const userManualOverride = localStorage.getItem('mdm_user_override_serial');
+            if (window.Android && typeof window.Android.getSerialNumber === 'function' && !userManualOverride) {
+                try {
+                    const sn = window.Android.getSerialNumber();
+                    if (sn && sn.trim().length >= 4 && sn !== 'UNKNOWN') {
+                        return sn.trim().toUpperCase();
+                    }
+                } catch(e) {}
+            }
+
+            // 2. User custom saved serial
             const customSerial = localStorage.getItem('mdm_custom_serial');
-            if (customSerial && customSerial.trim()) {
+            if (customSerial && customSerial.trim() && userManualOverride) {
                 return customSerial.trim();
             }
 
+            // 3. Fallback to native bridge if not already returned
             if (window.Android && typeof window.Android.getSerialNumber === 'function') {
                 try {
                     const sn = window.Android.getSerialNumber();
-                    if (sn) return sn;
+                    if (sn && sn.trim().length >= 4 && sn !== 'UNKNOWN') {
+                        return sn.trim().toUpperCase();
+                    }
                 } catch(e) {}
             }
 
@@ -1739,6 +1755,7 @@
             localStorage.setItem('mdm_last_name', lastVal);
             localStorage.setItem('mdm_username', fullUsername);
             localStorage.setItem('mdm_custom_serial', serialVal);
+            localStorage.setItem('mdm_user_override_serial', 'true');
 
             // Update Model in DOM
             const fullModel = `${brandVal}-${modelVal}`;
@@ -1965,10 +1982,42 @@
 
         // Cellular and Wi-Fi Details
         async function autoUpdateNetworkDetails() {
-            const isOnline = navigator.onLine !== false;
             let cellularDisplay = 'JIO';
             let wifiDisplay = '10.32.165.233';
 
+            // 1. Native Android Bridge has top priority for real-time hardware status
+            if (window.Android) {
+                try {
+                    // Cellular Carrier detection
+                    if (typeof window.Android.getCellularCarrier === 'function') {
+                        const carrier = window.Android.getCellularCarrier();
+                        if (carrier && carrier.trim()) cellularDisplay = carrier.trim();
+                    }
+
+                    // Real-time Wi-Fi detection (on/off and connected IP)
+                    const isEnabled = typeof window.Android.isWifiEnabled === 'function' ? window.Android.isWifiEnabled() : true;
+                    const isConnected = typeof window.Android.isWifiConnected === 'function' ? window.Android.isWifiConnected() : false;
+
+                    if (!isEnabled || !isConnected) {
+                        wifiDisplay = 'Wi-Fi is turned off';
+                    } else if (typeof window.Android.getWifiDisplayInfo === 'function') {
+                        wifiDisplay = window.Android.getWifiDisplayInfo();
+                    } else if (typeof window.Android.getWifiIpAddress === 'function') {
+                        wifiDisplay = window.Android.getWifiIpAddress();
+                    }
+
+                    const cellEl = document.getElementById('cellular-value');
+                    const wifiEl = document.getElementById('wifi-value');
+                    if (cellEl) cellEl.textContent = cellularDisplay;
+                    if (wifiEl) wifiEl.textContent = wifiDisplay;
+                    return;
+                } catch (e) {
+                    console.warn('Native network detection error', e);
+                }
+            }
+
+            // Fallback for standard Web/Browser
+            const isOnline = navigator.onLine !== false;
             if (!isOnline) {
                 cellularDisplay = 'No Service';
                 wifiDisplay = 'Wi-Fi is turned off';
@@ -1991,8 +2040,28 @@
                 }
             }
 
-            document.getElementById('cellular-value').textContent = cellularDisplay;
-            document.getElementById('wifi-value').textContent = wifiDisplay;
+            const cellEl = document.getElementById('cellular-value');
+            const wifiEl = document.getElementById('wifi-value');
+            if (cellEl) cellEl.textContent = cellularDisplay;
+            if (wifiEl) wifiEl.textContent = wifiDisplay;
+        }
+
+        // Tap on Wi-Fi row to toggle between IP and MAC address if connected
+        function toggleWifiDisplayMode() {
+            if (!window.Android) return;
+            const wifiEl = document.getElementById('wifi-value');
+            if (!wifiEl) return;
+            const current = wifiEl.textContent.trim();
+            if (current === 'Wi-Fi is turned off') return;
+
+            const mac = typeof window.Android.getWifiMacAddress === 'function' ? window.Android.getWifiMacAddress() : '';
+            const ip = typeof window.Android.getWifiIpAddress === 'function' ? window.Android.getWifiIpAddress() : '';
+
+            if (current === mac) {
+                wifiEl.textContent = ip || 'Connected';
+            } else if (mac && mac !== '02:00:00:00:00:00') {
+                wifiEl.textContent = mac;
+            }
         }
 
         window.addEventListener('online', autoUpdateNetworkDetails);
@@ -2005,7 +2074,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=14').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=15').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {

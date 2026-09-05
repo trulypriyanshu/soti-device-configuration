@@ -2,16 +2,27 @@ package com.soti.mdm;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import org.json.JSONObject;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 public class AndroidBridge {
@@ -59,34 +70,161 @@ public class AndroidBridge {
 
     @JavascriptInterface
     public String getSerialNumber() {
-        // Try Build.getSerial() (works if permission granted / MDM device owner)
+        // 1. Try Build.getSerial() (Android 8+)
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                String serial = Build.getSerial();
-                if (serial != null && !serial.equalsIgnoreCase("unknown") && !serial.trim().isEmpty()) {
-                    return serial.toUpperCase(Locale.US);
+                String s = Build.getSerial();
+                if (isValidSerial(s)) {
+                    return s.toUpperCase(Locale.US);
                 }
             }
-        } catch (SecurityException ignored) {
-            // Android 10+ restricts this for regular apps
+        } catch (Throwable ignored) {}
+
+        // 2. Try SystemProperties reflection (works on Pixel, Samsung, Xiaomi, etc.)
+        String[] propKeys = {"ro.serialno", "ro.boot.serialno", "gsm.sn1", "ril.serialnumber", "sys.serialnumber"};
+        for (String key : propKeys) {
+            try {
+                Class<?> sp = Class.forName("android.os.SystemProperties");
+                Method get = sp.getMethod("get", String.class);
+                String val = (String) get.invoke(null, key);
+                if (isValidSerial(val)) {
+                    return val.toUpperCase(Locale.US);
+                }
+            } catch (Throwable ignored) {}
         }
 
-        // Try Build.SERIAL (older Android)
+        // 3. Try Build.SERIAL
         try {
-            if (Build.SERIAL != null && !Build.SERIAL.equalsIgnoreCase("unknown") && !Build.SERIAL.trim().isEmpty()) {
+            if (isValidSerial(Build.SERIAL)) {
                 return Build.SERIAL.toUpperCase(Locale.US);
             }
-        } catch (Exception ignored) {}
+        } catch (Throwable ignored) {}
 
-        // Fallback: derive stable serial from Android ID
+        // 4. Secure Android ID fallback
         try {
             String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-            if (androidId != null && !androidId.trim().isEmpty()) {
+            if (androidId != null && !androidId.trim().isEmpty() && !androidId.equalsIgnoreCase("unknown")) {
                 return androidId.toUpperCase(Locale.US);
             }
-        } catch (Exception ignored) {}
+        } catch (Throwable ignored) {}
 
         return "";
+    }
+
+    private boolean isValidSerial(String s) {
+        return s != null && !s.trim().isEmpty() && !s.equalsIgnoreCase("unknown") && !s.equalsIgnoreCase("none");
+    }
+
+    @JavascriptInterface
+    public boolean isWifiEnabled() {
+        try {
+            WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            return wm != null && wm.isWifiEnabled();
+        } catch (Throwable ignored) {}
+        return false;
+    }
+
+    @JavascriptInterface
+    public boolean isWifiConnected() {
+        try {
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    Network net = cm.getActiveNetwork();
+                    if (net != null) {
+                        NetworkCapabilities caps = cm.getNetworkCapabilities(net);
+                        return caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+                    }
+                } else {
+                    android.net.NetworkInfo ni = cm.getActiveNetworkInfo();
+                    return ni != null && ni.isConnected() && ni.getType() == ConnectivityManager.TYPE_WIFI;
+                }
+            }
+        } catch (Throwable ignored) {}
+        return false;
+    }
+
+    @JavascriptInterface
+    public String getWifiIpAddress() {
+        if (!isWifiEnabled() || !isWifiConnected()) {
+            return "Wi-Fi is turned off";
+        }
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                if (intf.getName().equalsIgnoreCase("wlan0") || intf.getName().contains("wlan")) {
+                    List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                    for (InetAddress addr : addrs) {
+                        if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
+
+        // Fallback to WifiManager
+        try {
+            WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            if (wm != null) {
+                int ip = wm.getConnectionInfo().getIpAddress();
+                if (ip != 0) {
+                    return String.format(Locale.US, "%d.%d.%d.%d",
+                            (ip & 0xff), (ip >> 8 & 0xff), (ip >> 16 & 0xff), (ip >> 24 & 0xff));
+                }
+            }
+        } catch (Throwable ignored) {}
+
+        return "10.32.165.233";
+    }
+
+    @JavascriptInterface
+    public String getWifiMacAddress() {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                if (intf.getName().equalsIgnoreCase("wlan0")) {
+                    byte[] mac = intf.getHardwareAddress();
+                    if (mac != null) {
+                        StringBuilder buf = new StringBuilder();
+                        for (byte aMac : mac) {
+                            buf.append(String.format("%02X:", aMac));
+                        }
+                        if (buf.length() > 0) {
+                            buf.deleteCharAt(buf.length() - 1);
+                        }
+                        return buf.toString();
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
+        return "02:00:00:00:00:00";
+    }
+
+    @JavascriptInterface
+    public String getWifiDisplayInfo() {
+        if (!isWifiEnabled() || !isWifiConnected()) {
+            return "Wi-Fi is turned off";
+        }
+        return getWifiIpAddress();
+    }
+
+    @JavascriptInterface
+    public String getCellularCarrier() {
+        try {
+            TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm != null) {
+                String opName = tm.getNetworkOperatorName();
+                if (opName != null && !opName.trim().isEmpty()) {
+                    return opName.toUpperCase(Locale.US);
+                }
+                String simName = tm.getSimOperatorName();
+                if (simName != null && !simName.trim().isEmpty()) {
+                    return simName.toUpperCase(Locale.US);
+                }
+            }
+        } catch (Throwable ignored) {}
+        return "JIO";
     }
 
     @JavascriptInterface
@@ -99,7 +237,7 @@ public class AndroidBridge {
                 double gb = (double) memInfo.totalMem / (1024.0 * 1024.0 * 1024.0);
                 return String.format(Locale.US, "%.1f GB", gb);
             }
-        } catch (Exception ignored) {}
+        } catch (Throwable ignored) {}
         return "8 GB";
     }
 
@@ -112,7 +250,7 @@ public class AndroidBridge {
             long totalBlocks = stat.getBlockCountLong();
             double gb = (double) (totalBlocks * blockSize) / (1024.0 * 1024.0 * 1024.0);
             return String.format(Locale.US, "%.0f GB", gb);
-        } catch (Exception ignored) {}
+        } catch (Throwable ignored) {}
         return "128 GB";
     }
 
@@ -135,10 +273,15 @@ public class AndroidBridge {
             obj.put("androidVersion", getAndroidVersion());
             obj.put("sdkInt", getSdkInt());
             obj.put("serial", getSerialNumber());
+            obj.put("isWifiEnabled", isWifiEnabled());
+            obj.put("isWifiConnected", isWifiConnected());
+            obj.put("wifiIp", getWifiIpAddress());
+            obj.put("wifiMac", getWifiMacAddress());
+            obj.put("carrier", getCellularCarrier());
             obj.put("totalRam", getTotalRam());
             obj.put("totalStorage", getTotalStorage());
             obj.put("isKnox", isKnoxSupported());
-        } catch (Exception ignored) {}
+        } catch (Throwable ignored) {}
         return obj.toString();
     }
 

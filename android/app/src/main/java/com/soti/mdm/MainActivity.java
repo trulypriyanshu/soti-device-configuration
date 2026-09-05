@@ -113,11 +113,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Listen for live network changes (Wi-Fi toggling on/off, IP changes)
+        try {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                cm.registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(Network network) {
+                        notifyNetworkChanged();
+                    }
+
+                    @Override
+                    public void onLost(Network network) {
+                        notifyNetworkChanged();
+                    }
+
+                    @Override
+                    public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
+                        notifyNetworkChanged();
+                    }
+                });
+            }
+        } catch (Exception ignored) {}
+
         // Load Live Web Application
         if (savedInstanceState == null) {
             webView.loadUrl(APP_URL);
         } else {
             webView.restoreState(savedInstanceState);
+        }
+    }
+
+    private void notifyNetworkChanged() {
+        if (webView != null) {
+            webView.post(() -> {
+                webView.evaluateJavascript("if (typeof autoUpdateNetworkDetails === 'function') { autoUpdateNetworkDetails(); }", null);
+            });
         }
     }
 
