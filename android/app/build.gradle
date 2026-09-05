@@ -16,14 +16,25 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile file('signing.keystore')
+            storePassword 'IGNsuvs5cAFK'
+            keyAlias 'my-key-alias'
+            keyPassword 'IGNsuvs5cAFK'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             applicationIdSuffix ".debug"
             debuggable true
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
