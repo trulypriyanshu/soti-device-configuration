@@ -691,7 +691,7 @@
         .name-modal-box {
             background: #ffffff;
             width: 100%;
-            max-width: 360px;
+            max-width: 380px;
             border-radius: 16px;
             padding: 22px 20px 18px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
@@ -1298,13 +1298,37 @@
     <div class="name-modal-overlay" id="name-modal-overlay" onclick="closeNameModal(event)">
         <div class="name-modal-box" onclick="event.stopPropagation()">
             <div class="name-modal-title">Edit Device Information</div>
-            <div class="name-modal-sub">Customize username and hardware serial number:</div>
-            <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">User Name</label>
-            <input type="text" id="name-modal-input" class="name-modal-input" style="margin-bottom:12px;" placeholder="e.g. Jay_Parmar" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <div class="name-modal-sub">Customize brand, name, and hardware serial:</div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Device Brand</label>
+                    <input type="text" id="brand-modal-input" class="name-modal-input" style="text-transform: uppercase;" placeholder="GOOGLE" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+                </div>
+                <div style="flex: 1.2;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Device Model</label>
+                    <input type="text" id="model-modal-input" class="name-modal-input" placeholder="Pixel 9a" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">First Name</label>
+                    <input type="text" id="first-name-modal-input" class="name-modal-input" placeholder="Jay" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Last Name</label>
+                    <input type="text" id="last-name-modal-input" class="name-modal-input" placeholder="Parmar" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+                </div>
+            </div>
+
             <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Hardware Serial Number</label>
-            <input type="text" id="serial-modal-input" class="name-modal-input" placeholder="e.g. 62061XEBF2Q0AE" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <input type="text" id="serial-modal-input" class="name-modal-input" style="text-transform: uppercase;" placeholder="e.g. 62061XEBF2Q0AE" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
             <div style="font-size:11px; color:#80868b; margin-top:4px; margin-bottom:14px;">From Settings → About phone → Model &amp; hardware → Serial number</div>
-            <div class="name-modal-preview" id="name-modal-preview">C295-FAL_13985_Jay_Parmar_...</div>
+            <div class="name-modal-preview" id="name-modal-preview">
+                <div><strong>ID:</strong> C295-FAL_13985_Jay_Parmar_62061XEBF2Q0AE</div>
+                <div style="margin-top:4px;"><strong>Model:</strong> GOOGLE-Pixel 9a</div>
+            </div>
             <div class="name-modal-actions">
                 <button type="button" class="name-modal-btn cancel" onclick="closeNameModal()">Cancel</button>
                 <button type="button" class="name-modal-btn save" onclick="saveName()">Save</button>
@@ -1550,6 +1574,45 @@
             return generatedSerial;
         }
 
+        function formatNamePart(str) {
+            if (!str) return '';
+            const clean = str.trim();
+            if (!clean) return '';
+            return clean.split(/[\s_]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('_');
+        }
+
+        function getSavedFirstName() {
+            const saved = localStorage.getItem('mdm_first_name');
+            if (saved) return formatNamePart(saved);
+            const full = localStorage.getItem('mdm_username') || 'Jay_Parmar';
+            if (full.includes('_')) return formatNamePart(full.split('_')[0]);
+            return formatNamePart(full);
+        }
+
+        function getSavedLastName() {
+            const saved = localStorage.getItem('mdm_last_name');
+            if (saved) return formatNamePart(saved);
+            const full = localStorage.getItem('mdm_username') || 'Jay_Parmar';
+            if (full.includes('_')) return formatNamePart(full.split('_').slice(1).join('_'));
+            return 'Parmar';
+        }
+
+        function getSavedBrand() {
+            const saved = localStorage.getItem('mdm_device_brand');
+            if (saved && saved.trim()) return saved.trim().toUpperCase();
+            const currentModel = document.getElementById('device-model')?.textContent || 'GOOGLE-Pixel 9a';
+            if (currentModel.includes('-')) return currentModel.split('-')[0].toUpperCase();
+            return 'GOOGLE';
+        }
+
+        function getSavedModelName() {
+            const saved = localStorage.getItem('mdm_device_model_name');
+            if (saved && saved.trim()) return saved.trim();
+            const currentModel = document.getElementById('device-model')?.textContent || 'GOOGLE-Pixel 9a';
+            if (currentModel.includes('-')) return currentModel.split('-').slice(1).join('-');
+            return 'Pixel 9a';
+        }
+
         function getSavedUsername() {
             try {
                 const params = new URLSearchParams(window.location.search);
@@ -1560,7 +1623,11 @@
                     return clean;
                 }
             } catch (e) { }
-            return localStorage.getItem('mdm_username') || 'Jay_Parmar';
+
+            const first = getSavedFirstName();
+            const last = getSavedLastName();
+            if (first && last) return `${first}_${last}`;
+            return first || last || 'Jay_Parmar';
         }
 
         function formatDeviceIdentifier(username) {
@@ -1579,21 +1646,29 @@
         }
 
         function openNameModal() {
-            const current = getSavedUsername();
-            const currentModel = document.getElementById('device-model')?.textContent || 'GOOGLE-Pixel 9a';
-            const currentSerial = getDeviceSerial(currentModel);
+            const brand = getSavedBrand();
+            const model = getSavedModelName();
+            const first = getSavedFirstName();
+            const last = getSavedLastName();
+            const currentSerial = getDeviceSerial(`${brand}-${model}`);
 
-            const nameInput = document.getElementById('name-modal-input');
+            const brandInput = document.getElementById('brand-modal-input');
+            const modelInput = document.getElementById('model-modal-input');
+            const firstInput = document.getElementById('first-name-modal-input');
+            const lastInput = document.getElementById('last-name-modal-input');
             const serialInput = document.getElementById('serial-modal-input');
 
-            nameInput.value = current;
-            serialInput.value = currentSerial;
+            if (brandInput) brandInput.value = brand;
+            if (modelInput) modelInput.value = model;
+            if (firstInput) firstInput.value = first;
+            if (lastInput) lastInput.value = last;
+            if (serialInput) serialInput.value = currentSerial;
 
             updateNamePreview();
             document.getElementById('name-modal-overlay')?.classList.add('open');
             setTimeout(() => {
-                nameInput.focus();
-                nameInput.select();
+                brandInput?.focus();
+                brandInput?.select();
             }, 80);
         }
 
@@ -1603,20 +1678,77 @@
         }
 
         function updateNamePreview() {
-            const nameVal = document.getElementById('name-modal-input').value.trim() || 'Username';
-            const serialVal = document.getElementById('serial-modal-input').value.trim() || 'SERIAL';
-            document.getElementById('name-modal-preview').textContent = `${ID_PREFIX}${nameVal}_${serialVal}`;
+            const brandRaw = document.getElementById('brand-modal-input')?.value.trim() || '';
+            const modelRaw = document.getElementById('model-modal-input')?.value.trim() || '';
+            const firstRaw = document.getElementById('first-name-modal-input')?.value.trim() || '';
+            const lastRaw = document.getElementById('last-name-modal-input')?.value.trim() || '';
+            const serialRaw = document.getElementById('serial-modal-input')?.value.trim() || '';
+
+            const brandVal = (brandRaw || 'GOOGLE').toUpperCase();
+            const modelVal = modelRaw || 'Pixel 9a';
+            const firstVal = formatNamePart(firstRaw || 'Jay');
+            const lastVal = formatNamePart(lastRaw || 'Parmar');
+            const serialVal = (serialRaw || '62061XEBF2Q0AE').toUpperCase();
+
+            let fullUsername = firstVal;
+            if (lastVal) {
+                fullUsername = firstVal ? `${firstVal}_${lastVal}` : lastVal;
+            }
+
+            const previewEl = document.getElementById('name-modal-preview');
+            if (previewEl) {
+                previewEl.innerHTML = 
+                    `<div><strong>ID:</strong> ${ID_PREFIX}${fullUsername}_${serialVal}</div>` +
+                    `<div style="margin-top:4px;"><strong>Model:</strong> ${brandVal}-${modelVal}</div>`;
+            }
         }
 
         function saveName() {
-            const nameVal = document.getElementById('name-modal-input').value.trim();
-            const serialVal = document.getElementById('serial-modal-input').value.trim();
-            if (nameVal) {
-                localStorage.setItem('mdm_username', nameVal);
+            const brandRaw = document.getElementById('brand-modal-input')?.value.trim() || '';
+            const modelRaw = document.getElementById('model-modal-input')?.value.trim() || '';
+            const firstRaw = document.getElementById('first-name-modal-input')?.value.trim() || '';
+            const lastRaw = document.getElementById('last-name-modal-input')?.value.trim() || '';
+            const serialRaw = document.getElementById('serial-modal-input')?.value.trim() || '';
+
+            const brandVal = (brandRaw || 'GOOGLE').toUpperCase();
+            const modelVal = modelRaw || 'Pixel 9a';
+            const firstVal = formatNamePart(firstRaw || 'Jay');
+            const lastVal = formatNamePart(lastRaw || 'Parmar');
+            const serialVal = (serialRaw || '62061XEBF2Q0AE').toUpperCase();
+
+            let fullUsername = firstVal;
+            if (lastVal) {
+                fullUsername = firstVal ? `${firstVal}_${lastVal}` : lastVal;
             }
-            if (serialVal) {
-                localStorage.setItem('mdm_custom_serial', serialVal.toUpperCase());
+
+            localStorage.setItem('mdm_device_brand', brandVal);
+            localStorage.setItem('mdm_device_model_name', modelVal);
+            localStorage.setItem('mdm_first_name', firstVal);
+            localStorage.setItem('mdm_last_name', lastVal);
+            localStorage.setItem('mdm_username', fullUsername);
+            localStorage.setItem('mdm_custom_serial', serialVal);
+
+            // Update Model in DOM
+            const fullModel = `${brandVal}-${modelVal}`;
+            const modelEl = document.getElementById('device-model');
+            const subEl = document.getElementById('drawer-device-sub');
+            if (modelEl) modelEl.textContent = fullModel;
+            if (subEl) subEl.textContent = modelVal;
+
+            // Update OS and Enterprise API based on updated model
+            const currentOs = document.getElementById('device-os')?.textContent;
+            const accurateOs = getAccurateAndroidVersion(fullModel, currentOs);
+            const osEl = document.getElementById('device-os');
+            const apiEl = document.getElementById('active-mdm-api');
+            if (osEl) osEl.textContent = accurateOs;
+            if (apiEl) apiEl.innerHTML = computeEnterpriseApi(fullModel, accurateOs);
+
+            // Knox Badge visibility: only Samsung
+            const badgeEl = document.getElementById('work-badge');
+            if (badgeEl) {
+                badgeEl.style.display = brandVal.includes('SAMSUNG') ? 'flex' : 'none';
             }
+
             updateDeviceNameDisplay();
             closeNameModal();
         }
@@ -1743,22 +1875,32 @@
                 }
             }
 
-            // Default to Pixel 9a as requested
-            const isAndroid = /Android/i.test(ua) || (navigator.userAgentData && navigator.userAgentData.platform === 'Android');
-            if (!isAndroid || !detectedModel) {
-                detectedModel = 'Pixel 9a';
-                detectedOs = 'Android 17';
-            }
-
-            // Prefix formatting
+            // Check if user previously customized brand and model
+            const savedBrand = localStorage.getItem('mdm_device_brand');
+            const savedModelName = localStorage.getItem('mdm_device_model_name');
             let cleanSubModel = detectedModel;
-            if (/pixel/i.test(detectedModel)) {
-                cleanSubModel = detectedModel.replace(/^Google\s*/i, '');
-                detectedModel = 'GOOGLE-' + cleanSubModel;
-            } else if (/samsung|sm-/i.test(detectedModel)) {
-                cleanSubModel = detectedModel.replace(/^Samsung\s*/i, '');
-                if (!detectedModel.startsWith('SAMSUNG-')) {
-                    detectedModel = 'SAMSUNG-' + cleanSubModel;
+
+            if (savedBrand && savedModelName) {
+                detectedModel = `${savedBrand.toUpperCase()}-${savedModelName}`;
+                cleanSubModel = savedModelName;
+            } else {
+                // Default to Pixel 9a as requested
+                const isAndroid = /Android/i.test(ua) || (navigator.userAgentData && navigator.userAgentData.platform === 'Android');
+                if (!isAndroid || !detectedModel) {
+                    detectedModel = 'Pixel 9a';
+                    detectedOs = 'Android 17';
+                }
+
+                // Prefix formatting
+                cleanSubModel = detectedModel;
+                if (/pixel/i.test(detectedModel)) {
+                    cleanSubModel = detectedModel.replace(/^Google\s*/i, '');
+                    detectedModel = 'GOOGLE-' + cleanSubModel;
+                } else if (/samsung|sm-/i.test(detectedModel)) {
+                    cleanSubModel = detectedModel.replace(/^Samsung\s*/i, '');
+                    if (!detectedModel.startsWith('SAMSUNG-')) {
+                        detectedModel = 'SAMSUNG-' + cleanSubModel;
+                    }
                 }
             }
 
@@ -1825,7 +1967,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=13').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=14').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
