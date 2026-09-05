@@ -1,9 +1,12 @@
-const CACHE_NAME = 'soti-config-v9';
+const CACHE_NAME = 'soti-config-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './soti-mobicontrol-squircle.svg',
+  './soti-maskable.svg',
+  './soti-maskable-512.png',
+  './soti-maskable-192.png',
   './192.png',
   './512.png'
 ];
