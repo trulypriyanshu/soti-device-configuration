@@ -907,7 +907,7 @@
     <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
     <div class="drawer" id="drawer">
         <div class="drawer-header">
-            <div class="drawer-device-name" id="drawer-device-name">C295-FAL_13985-Jay_Parmar_62061XEBF2Q0AE</div>
+            <div class="drawer-device-name" id="drawer-device-name">C295-FAL_13985_Jay_Parmar_62061XEBF2Q0AE</div>
             <div class="drawer-device-sub" id="drawer-device-sub">Pixel 9a</div>
         </div>
         <div class="drawer-menu">
@@ -986,7 +986,7 @@
                             </svg>
                         </div>
                         <div class="item-info">
-                            <div class="device-name" id="device-name">C295-FAL_13985-Jay_Parmar_62061XEBF2Q0AE</div>
+                            <div class="device-name" id="device-name">C295-FAL_13985_Jay_Parmar_62061XEBF2Q0AE</div>
                             <div class="device-sub" id="device-model">GOOGLE-Pixel 9a</div>
                             <div class="device-sub" id="device-os">Android 17</div>
                         </div>
@@ -1304,7 +1304,7 @@
             <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Hardware Serial Number</label>
             <input type="text" id="serial-modal-input" class="name-modal-input" placeholder="e.g. 62061XEBF2Q0AE" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
             <div style="font-size:11px; color:#80868b; margin-top:4px; margin-bottom:14px;">From Settings → About phone → Model &amp; hardware → Serial number</div>
-            <div class="name-modal-preview" id="name-modal-preview">C295-FAL_13985-Jay_Parmar_...</div>
+            <div class="name-modal-preview" id="name-modal-preview">C295-FAL_13985_Jay_Parmar_...</div>
             <div class="name-modal-actions">
                 <button type="button" class="name-modal-btn cancel" onclick="closeNameModal()">Cancel</button>
                 <button type="button" class="name-modal-btn save" onclick="saveName()">Save</button>
@@ -1313,7 +1313,7 @@
     </div>
 
     <script>
-        const ID_PREFIX = 'C295-FAL_13985-';
+        const ID_PREFIX = 'C295-FAL_13985_';
         let currentScreen = 'config';
         let currentConfigTab = 'device';
         let currentCatalogTab = 'play';
@@ -1825,7 +1825,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=12').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=13').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
