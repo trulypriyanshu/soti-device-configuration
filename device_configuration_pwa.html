@@ -7,6 +7,7 @@
     <meta name="application-name" content="SOTI MobiControl">
     <meta name="apple-mobile-web-app-title" content="SOTI MobiControl">
     <meta name="theme-color" content="#2b6bab">
+    <meta name="color-scheme" content="light">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -17,6 +18,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root, html, body {
+            color-scheme: light !important;
+            supported-color-schemes: light !important;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -411,6 +417,68 @@
         /* Hide scrollbars */
         ::-webkit-scrollbar {
             display: none;
+        }
+
+        /* Prevent Dark Mode auto color inversion on Android/Samsung devices */
+        @media (prefers-color-scheme: dark) {
+            :root, html, body {
+                color-scheme: light !important;
+                background: #e5ddf5 !important;
+                color: #1e192a !important;
+            }
+
+            .header {
+                background: #2b6bab !important;
+            }
+
+            .header-title, .menu-badge, .tab.active {
+                color: #ffffff !important;
+            }
+
+            .tab {
+                color: rgba(255, 255, 255, 0.72) !important;
+            }
+
+            .content {
+                background: #e5ddf5 !important;
+            }
+
+            .section-title, .item-value, .device-sub {
+                color: #5c4e70 !important;
+            }
+
+            .item-label, .device-name {
+                color: #1a1626 !important;
+            }
+
+            .item-value.green {
+                color: #3ba14a !important;
+            }
+
+            .item-icon svg {
+                stroke: #252030 !important;
+            }
+
+            .name-modal-box {
+                background: #ffffff !important;
+            }
+
+            .name-modal-title, .name-modal-input {
+                color: #1f1a2b !important;
+            }
+
+            .name-modal-input {
+                background: #f9f8fc !important;
+                border-color: #2b6bab !important;
+            }
+
+            .profiles-placeholder {
+                color: #6b5d80 !important;
+            }
+
+            .profiles-placeholder svg {
+                stroke: #8675a0 !important;
+            }
         }
     </style>
 </head>
@@ -1143,7 +1211,7 @@
 
         // Register service worker with instant real-time update handling
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=4').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=5').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
