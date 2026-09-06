@@ -1072,7 +1072,7 @@
                             <div class="item-value" id="cellular-value">JIO</div>
                         </div>
                     </div>
-                    <div class="item" onclick="toggleWifiDisplayMode()" style="cursor: pointer;" title="Tap to toggle between IP and MAC address">
+                    <div class="item" onclick="toggleWifiDisplayMode()" style="cursor: pointer;" title="Tap to configure Wi-Fi MAC Address">
                         <div class="item-icon">
                             <svg viewBox="0 0 24 24">
                                 <path d="M2.5 8.5a14 14 0 0 1 19 0" />
@@ -1083,7 +1083,7 @@
                         </div>
                         <div class="item-info">
                             <div class="item-label">Wi-Fi</div>
-                            <div class="item-value" id="wifi-value">10.32.165.233</div>
+                            <div class="item-value" id="wifi-value">70:26:05:8B:2A:4F</div>
                         </div>
                     </div>
                 </div>
@@ -1324,10 +1324,16 @@
 
             <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Hardware Serial Number</label>
             <input type="text" id="serial-modal-input" class="name-modal-input" style="text-transform: uppercase;" placeholder="e.g. 62061XEBF2Q0AE" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
-            <div style="font-size:11px; color:#80868b; margin-top:4px; margin-bottom:14px;">From Settings → About phone → Model &amp; hardware → Serial number</div>
+            <div style="font-size:11px; color:#80868b; margin-top:4px; margin-bottom:12px;">From Settings → About phone → Model &amp; hardware → Serial number</div>
+
+            <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Wi-Fi MAC Address</label>
+            <input type="text" id="mac-modal-input" class="name-modal-input" style="text-transform: uppercase;" placeholder="e.g. 70:26:05:8B:2A:4F" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <div style="font-size:11px; color:#80868b; margin-top:4px; margin-bottom:14px;">Shown when Wi-Fi is ON (shows &quot;Wi-Fi is turned off&quot; when OFF)</div>
+
             <div class="name-modal-preview" id="name-modal-preview">
                 <div><strong>ID:</strong> C295-FAL_13985_Jay_Parmar_62061XEBF2Q0AE</div>
                 <div style="margin-top:4px;"><strong>Model:</strong> GOOGLE-Pixel 9a</div>
+                <div style="margin-top:4px;"><strong>Wi-Fi MAC:</strong> 70:26:05:8B:2A:4F</div>
             </div>
             <div class="name-modal-actions">
                 <button type="button" class="name-modal-btn cancel" onclick="closeNameModal()">Cancel</button>
@@ -1673,24 +1679,33 @@
             if (drawerNameEl) drawerNameEl.textContent = id;
         }
 
+        function getSavedWifiMac() {
+            const saved = localStorage.getItem('mdm_wifi_mac');
+            if (saved && saved.trim()) return saved.trim().toUpperCase();
+            return '70:26:05:8B:2A:4F';
+        }
+
         function openNameModal() {
             const brand = getSavedBrand();
             const model = getSavedModelName();
             const first = getSavedFirstName();
             const last = getSavedLastName();
             const currentSerial = getDeviceSerial(`${brand}-${model}`);
+            const currentMac = getSavedWifiMac();
 
             const brandInput = document.getElementById('brand-modal-input');
             const modelInput = document.getElementById('model-modal-input');
             const firstInput = document.getElementById('first-name-modal-input');
             const lastInput = document.getElementById('last-name-modal-input');
             const serialInput = document.getElementById('serial-modal-input');
+            const macInput = document.getElementById('mac-modal-input');
 
             if (brandInput) brandInput.value = brand;
             if (modelInput) modelInput.value = model;
             if (firstInput) firstInput.value = first;
             if (lastInput) lastInput.value = last;
             if (serialInput) serialInput.value = currentSerial;
+            if (macInput) macInput.value = currentMac;
 
             updateNamePreview();
             document.getElementById('name-modal-overlay')?.classList.add('open');
@@ -1711,12 +1726,14 @@
             const firstRaw = document.getElementById('first-name-modal-input')?.value.trim() || '';
             const lastRaw = document.getElementById('last-name-modal-input')?.value.trim() || '';
             const serialRaw = document.getElementById('serial-modal-input')?.value.trim() || '';
+            const macRaw = document.getElementById('mac-modal-input')?.value.trim() || '';
 
             const brandVal = (brandRaw || 'GOOGLE').toUpperCase();
             const modelVal = modelRaw || 'Pixel 9a';
             const firstVal = formatNamePart(firstRaw || 'Jay');
             const lastVal = formatNamePart(lastRaw || 'Parmar');
             const serialVal = (serialRaw || '62061XEBF2Q0AE').toUpperCase();
+            const macVal = (macRaw || getSavedWifiMac()).toUpperCase();
 
             let fullUsername = firstVal;
             if (lastVal) {
@@ -1727,7 +1744,8 @@
             if (previewEl) {
                 previewEl.innerHTML = 
                     `<div><strong>ID:</strong> ${ID_PREFIX}${fullUsername}_${serialVal}</div>` +
-                    `<div style="margin-top:4px;"><strong>Model:</strong> ${brandVal}-${modelVal}</div>`;
+                    `<div style="margin-top:4px;"><strong>Model:</strong> ${brandVal}-${modelVal}</div>` +
+                    `<div style="margin-top:4px;"><strong>Wi-Fi MAC:</strong> ${macVal}</div>`;
             }
         }
 
@@ -1737,12 +1755,14 @@
             const firstRaw = document.getElementById('first-name-modal-input')?.value.trim() || '';
             const lastRaw = document.getElementById('last-name-modal-input')?.value.trim() || '';
             const serialRaw = document.getElementById('serial-modal-input')?.value.trim() || '';
+            const macRaw = document.getElementById('mac-modal-input')?.value.trim() || '';
 
             const brandVal = (brandRaw || 'GOOGLE').toUpperCase();
             const modelVal = modelRaw || 'Pixel 9a';
             const firstVal = formatNamePart(firstRaw || 'Jay');
             const lastVal = formatNamePart(lastRaw || 'Parmar');
             const serialVal = (serialRaw || '62061XEBF2Q0AE').toUpperCase();
+            const macVal = (macRaw || '70:26:05:8B:2A:4F').toUpperCase();
 
             let fullUsername = firstVal;
             if (lastVal) {
@@ -1756,6 +1776,7 @@
             localStorage.setItem('mdm_username', fullUsername);
             localStorage.setItem('mdm_custom_serial', serialVal);
             localStorage.setItem('mdm_user_override_serial', 'true');
+            localStorage.setItem('mdm_wifi_mac', macVal);
 
             // Update Model in DOM
             const fullModel = `${brandVal}-${modelVal}`;
@@ -1779,6 +1800,7 @@
             }
 
             updateDeviceNameDisplay();
+            autoUpdateNetworkDetails();
             closeNameModal();
         }
 
@@ -1983,7 +2005,7 @@
         // Cellular and Wi-Fi Details
         async function autoUpdateNetworkDetails() {
             let cellularDisplay = 'JIO';
-            let wifiDisplay = '10.32.165.233';
+            let isWifiOn = true;
 
             // 1. Native Android Bridge has top priority for real-time hardware status
             if (window.Android) {
@@ -1994,17 +2016,13 @@
                         if (carrier && carrier.trim()) cellularDisplay = carrier.trim();
                     }
 
-                    // Real-time Wi-Fi detection (on/off and connected IP)
-                    const isEnabled = typeof window.Android.isWifiEnabled === 'function' ? window.Android.isWifiEnabled() : true;
+                    // Real-time Wi-Fi detection (strictly on/off condition)
+                    const isEnabled = typeof window.Android.isWifiEnabled === 'function' ? window.Android.isWifiEnabled() : false;
                     const isConnected = typeof window.Android.isWifiConnected === 'function' ? window.Android.isWifiConnected() : false;
 
-                    if (!isEnabled || !isConnected) {
-                        wifiDisplay = 'Wi-Fi is turned off';
-                    } else if (typeof window.Android.getWifiDisplayInfo === 'function') {
-                        wifiDisplay = window.Android.getWifiDisplayInfo();
-                    } else if (typeof window.Android.getWifiIpAddress === 'function') {
-                        wifiDisplay = window.Android.getWifiIpAddress();
-                    }
+                    isWifiOn = isEnabled || isConnected;
+
+                    const wifiDisplay = isWifiOn ? getSavedWifiMac() : 'Wi-Fi is turned off';
 
                     const cellEl = document.getElementById('cellular-value');
                     const wifiEl = document.getElementById('wifi-value');
@@ -2020,7 +2038,7 @@
             const isOnline = navigator.onLine !== false;
             if (!isOnline) {
                 cellularDisplay = 'No Service';
-                wifiDisplay = 'Wi-Fi is turned off';
+                isWifiOn = false;
             } else {
                 let detectedCarrier = '';
                 try {
@@ -2038,30 +2056,30 @@
                 if (detectedCarrier) {
                     cellularDisplay = detectedCarrier;
                 }
+
+                // In browser, check Network Information API if available
+                if (navigator.connection && navigator.connection.type === 'cellular') {
+                    isWifiOn = false;
+                }
             }
 
+            const wifiDisplay = isWifiOn ? getSavedWifiMac() : 'Wi-Fi is turned off';
             const cellEl = document.getElementById('cellular-value');
             const wifiEl = document.getElementById('wifi-value');
             if (cellEl) cellEl.textContent = cellularDisplay;
             if (wifiEl) wifiEl.textContent = wifiDisplay;
         }
 
-        // Tap on Wi-Fi row to toggle between IP and MAC address if connected
+        // Tap on Wi-Fi row to open modal focused on Wi-Fi MAC Address
         function toggleWifiDisplayMode() {
-            if (!window.Android) return;
-            const wifiEl = document.getElementById('wifi-value');
-            if (!wifiEl) return;
-            const current = wifiEl.textContent.trim();
-            if (current === 'Wi-Fi is turned off') return;
-
-            const mac = typeof window.Android.getWifiMacAddress === 'function' ? window.Android.getWifiMacAddress() : '';
-            const ip = typeof window.Android.getWifiIpAddress === 'function' ? window.Android.getWifiIpAddress() : '';
-
-            if (current === mac) {
-                wifiEl.textContent = ip || 'Connected';
-            } else if (mac && mac !== '02:00:00:00:00:00') {
-                wifiEl.textContent = mac;
-            }
+            openNameModal();
+            setTimeout(() => {
+                const macInput = document.getElementById('mac-modal-input');
+                if (macInput) {
+                    macInput.focus();
+                    macInput.select();
+                }
+            }, 120);
         }
 
         window.addEventListener('online', autoUpdateNetworkDetails);
@@ -2074,7 +2092,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=15').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=16').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
