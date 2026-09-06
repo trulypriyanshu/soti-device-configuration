@@ -43,7 +43,16 @@ This project is a high-fidelity replica of the enterprise **SOTI MobiControl** A
      - **When Wi-Fi is OFF**: The Wi-Fi row automatically shows `"Wi-Fi is turned off"`.
      - **Form Trigger**: Clicking on the Wi-Fi row or Device Information section does **not** open the form. The form opens **only** when tapping on the **User** section (`Agent Mode: User`) with **3 fingers 5 times**.
 
-5. **CI/CD Build Automation**:
+5. **Persistent SOTI MobiControl Notification**:
+   - Matches official OEM notification shade layout (`IMG-20260906-WA0011.jpg`):
+     - **Title**: `SOTI MobiControl`
+     - **Text**: `SOTI MobiControl is running`
+     - **Channel**: `soti_mobicontrol_persistent` with `IMPORTANCE_LOW` (silent, categorized under "Silent" notifications without sound/vibration).
+     - **Icons**: SOTI vector logo small icon + high-resolution round SOTI logo large icon on the right.
+     - **Ongoing**: Non-dismissible / persistent (`setOngoing(true)`).
+     - **Trigger**: App automatically checks `POST_NOTIFICATIONS` permission and triggers the persistent notification immediately on launch and resume.
+
+6. **CI/CD Build Automation**:
    - GitHub Actions workflow (`.github/workflows/build-apk.yml`) automatically compiles and signs the release APK upon every push to `main`.
    - Generates release artifacts containing:
      - `SOTI-MobiControl-Release-Signed.apk`

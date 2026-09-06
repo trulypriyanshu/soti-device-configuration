@@ -1,9 +1,15 @@
 package com.soti.mdm;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -21,6 +27,7 @@ import android.widget.ProgressBar;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private ProgressBar progressBar;
     private static final String APP_URL = "https://soti-mdm.vercel.app/";
+    private static final String CHANNEL_ID = "soti_mobicontrol_persistent";
+    private static final int NOTIFICATION_ID = 1001;
+    private static final int PERMISSION_REQ_CODE = 2001;
 
     @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     @Override
@@ -37,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Configure Status Bar
         setupStatusBar();
+
+        // Show Persistent SOTI MobiControl Notification matching enterprise agent
+        checkAndShowNotification();
 
         webView = findViewById(R.id.webview);
         progressBar = findViewById(R.id.progressBar);
@@ -171,6 +184,89 @@ public class MainActivity extends AppCompatActivity {
                 View decor = getWindow().getDecorView();
                 decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showPersistentNotification();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "SOTI MobiControl",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("SOTI MobiControl is running");
+            channel.setShowBadge(false);
+            channel.enableVibration(false);
+            channel.setSound(null, null);
+
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    private void checkAndShowNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERMISSION_REQ_CODE);
+                return;
+            }
+        }
+        showPersistentNotification();
+    }
+
+    private void showPersistentNotification() {
+        createNotificationChannel();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, pendingIntentFlags);
+
+        Bitmap largeIcon = null;
+        try {
+            largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_soti_logo);
+        } catch (Throwable ignored) {}
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_soti_notification)
+                .setContentTitle("SOTI MobiControl")
+                .setContentText("SOTI MobiControl is running")
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(pendingIntent);
+
+        if (largeIcon != null) {
+            builder.setLargeIcon(largeIcon);
+        }
+
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.notify(NOTIFICATION_ID, builder.build());
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQ_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            showPersistentNotification();
         }
     }
 
