@@ -37,13 +37,11 @@ This project is a high-fidelity replica of the enterprise **SOTI MobiControl** A
      - `MainActivity.java` registers a `ConnectivityManager.NetworkCallback` that dispatches immediate updates to the web app (`autoUpdateNetworkDetails()`) whenever Wi-Fi is toggled on or off in device settings.
 
 4. **Wi-Fi MAC Address & Hardware Privacy Handling**:
-   - **Android 10+ Privacy Limitation**: Standard non-privileged applications and browsers are restricted from reading real hardware MAC addresses (returning `02:00:00:00:00:00`).
-   - **Solution**:
-     - The app strictly detects whether Wi-Fi is **ON** or **OFF**.
-     - An editable **Wi-Fi MAC Address** field was added to the "Edit Device Information" modal with persistent local storage (`mdm_wifi_mac`) and live preview.
-     - **When Wi-Fi is ON**: The Wi-Fi row shows the configured MAC address (default `70:26:05:8B:2A:4F`).
-     - **When Wi-Fi is OFF**: The Wi-Fi row shows `"Wi-Fi is turned off"`.
-     - Tapping the Wi-Fi row directly opens the modal focused on the Wi-Fi MAC input.
+   - **Replacement of MAC Address with IP Address**:
+     - An editable **Wi-Fi IP Address** field is present in the "Edit Device Information" modal with persistent local storage (`mdm_wifi_ip`) and real-time live preview.
+     - **When Wi-Fi is ON**: The Wi-Fi row shows the configured/live IP address (default `10.32.165.233`).
+     - **When Wi-Fi is OFF**: The Wi-Fi row automatically shows `"Wi-Fi is turned off"`.
+     - Tapping the Wi-Fi row directly opens the modal focused on the Wi-Fi IP input.
 
 5. **CI/CD Build Automation**:
    - GitHub Actions workflow (`.github/workflows/build-apk.yml`) automatically compiles and signs the release APK upon every push to `main`.
@@ -59,7 +57,7 @@ This project is a high-fidelity replica of the enterprise **SOTI MobiControl** A
 |---|---|
 | `index.html` | Core web application, UI design, modals, network detection logic, and service worker registration. |
 | `device_configuration_pwa.html` | Exact synchronization of `index.html` for standalone PWA reference. |
-| `sw.js` | Service Worker script handling network caching (`soti-config-v16`). |
+| `sw.js` | Service Worker script handling network caching (`soti-config-v17`). |
 | `manifest.json` | Web App Manifest for PWA installation (icons, theme colors, display standalone). |
 | `android/app/src/main/AndroidManifest.xml` | Android application manifest with permissions (`ACCESS_WIFI_STATE`, `ACCESS_NETWORK_STATE`, `READ_PHONE_STATE`, `INTERNET`). |
 | `android/app/src/main/java/com/soti/mdm/MainActivity.java` | Native WebView host, status bar styling, and live `ConnectivityManager.NetworkCallback`. |
