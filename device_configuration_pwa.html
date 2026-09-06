@@ -1072,7 +1072,7 @@
                             <div class="item-value" id="cellular-value">JIO</div>
                         </div>
                     </div>
-                    <div class="item" onclick="toggleWifiDisplayMode()" style="cursor: pointer;" title="Tap to configure Wi-Fi MAC Address">
+                    <div class="item" onclick="toggleWifiDisplayMode()" style="cursor: pointer;" title="Tap to configure Wi-Fi IP Address">
                         <div class="item-icon">
                             <svg viewBox="0 0 24 24">
                                 <path d="M2.5 8.5a14 14 0 0 1 19 0" />
@@ -1083,7 +1083,7 @@
                         </div>
                         <div class="item-info">
                             <div class="item-label">Wi-Fi</div>
-                            <div class="item-value" id="wifi-value">70:26:05:8B:2A:4F</div>
+                            <div class="item-value" id="wifi-value">10.32.165.233</div>
                         </div>
                     </div>
                 </div>
@@ -1326,14 +1326,14 @@
             <input type="text" id="serial-modal-input" class="name-modal-input" style="text-transform: uppercase;" placeholder="e.g. 62061XEBF2Q0AE" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
             <div style="font-size:11px; color:#80868b; margin-top:4px; margin-bottom:12px;">From Settings → About phone → Model &amp; hardware → Serial number</div>
 
-            <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Wi-Fi MAC Address</label>
-            <input type="text" id="mac-modal-input" class="name-modal-input" style="text-transform: uppercase;" placeholder="e.g. 70:26:05:8B:2A:4F" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
+            <label style="display:block; font-size:12px; font-weight:600; color:#5f6368; margin-bottom:4px;">Wi-Fi IP Address</label>
+            <input type="text" id="ip-modal-input" class="name-modal-input" placeholder="e.g. 10.32.165.233" spellcheck="false" autocomplete="off" oninput="updateNamePreview()">
             <div style="font-size:11px; color:#80868b; margin-top:4px; margin-bottom:14px;">Shown when Wi-Fi is ON (shows &quot;Wi-Fi is turned off&quot; when OFF)</div>
 
             <div class="name-modal-preview" id="name-modal-preview">
                 <div><strong>ID:</strong> C295-FAL_13985_Jay_Parmar_62061XEBF2Q0AE</div>
                 <div style="margin-top:4px;"><strong>Model:</strong> GOOGLE-Pixel 9a</div>
-                <div style="margin-top:4px;"><strong>Wi-Fi MAC:</strong> 70:26:05:8B:2A:4F</div>
+                <div style="margin-top:4px;"><strong>Wi-Fi IP:</strong> 10.32.165.233</div>
             </div>
             <div class="name-modal-actions">
                 <button type="button" class="name-modal-btn cancel" onclick="closeNameModal()">Cancel</button>
@@ -1679,10 +1679,14 @@
             if (drawerNameEl) drawerNameEl.textContent = id;
         }
 
-        function getSavedWifiMac() {
-            const saved = localStorage.getItem('mdm_wifi_mac');
-            if (saved && saved.trim()) return saved.trim().toUpperCase();
-            return '70:26:05:8B:2A:4F';
+        function getSavedWifiIp() {
+            const saved = localStorage.getItem('mdm_wifi_ip');
+            if (saved && saved.trim()) return saved.trim();
+            if (window.Android && typeof window.Android.getWifiIpAddress === 'function') {
+                const liveIp = window.Android.getWifiIpAddress();
+                if (liveIp && liveIp !== 'Wi-Fi is turned off') return liveIp;
+            }
+            return '10.32.165.233';
         }
 
         function openNameModal() {
@@ -1691,21 +1695,21 @@
             const first = getSavedFirstName();
             const last = getSavedLastName();
             const currentSerial = getDeviceSerial(`${brand}-${model}`);
-            const currentMac = getSavedWifiMac();
+            const currentIp = getSavedWifiIp();
 
             const brandInput = document.getElementById('brand-modal-input');
             const modelInput = document.getElementById('model-modal-input');
             const firstInput = document.getElementById('first-name-modal-input');
             const lastInput = document.getElementById('last-name-modal-input');
             const serialInput = document.getElementById('serial-modal-input');
-            const macInput = document.getElementById('mac-modal-input');
+            const ipInput = document.getElementById('ip-modal-input');
 
             if (brandInput) brandInput.value = brand;
             if (modelInput) modelInput.value = model;
             if (firstInput) firstInput.value = first;
             if (lastInput) lastInput.value = last;
             if (serialInput) serialInput.value = currentSerial;
-            if (macInput) macInput.value = currentMac;
+            if (ipInput) ipInput.value = currentIp;
 
             updateNamePreview();
             document.getElementById('name-modal-overlay')?.classList.add('open');
@@ -1726,14 +1730,14 @@
             const firstRaw = document.getElementById('first-name-modal-input')?.value.trim() || '';
             const lastRaw = document.getElementById('last-name-modal-input')?.value.trim() || '';
             const serialRaw = document.getElementById('serial-modal-input')?.value.trim() || '';
-            const macRaw = document.getElementById('mac-modal-input')?.value.trim() || '';
+            const ipRaw = document.getElementById('ip-modal-input')?.value.trim() || '';
 
             const brandVal = (brandRaw || 'GOOGLE').toUpperCase();
             const modelVal = modelRaw || 'Pixel 9a';
             const firstVal = formatNamePart(firstRaw || 'Jay');
             const lastVal = formatNamePart(lastRaw || 'Parmar');
             const serialVal = (serialRaw || '62061XEBF2Q0AE').toUpperCase();
-            const macVal = (macRaw || getSavedWifiMac()).toUpperCase();
+            const ipVal = ipRaw || getSavedWifiIp();
 
             let fullUsername = firstVal;
             if (lastVal) {
@@ -1745,7 +1749,7 @@
                 previewEl.innerHTML = 
                     `<div><strong>ID:</strong> ${ID_PREFIX}${fullUsername}_${serialVal}</div>` +
                     `<div style="margin-top:4px;"><strong>Model:</strong> ${brandVal}-${modelVal}</div>` +
-                    `<div style="margin-top:4px;"><strong>Wi-Fi MAC:</strong> ${macVal}</div>`;
+                    `<div style="margin-top:4px;"><strong>Wi-Fi IP:</strong> ${ipVal}</div>`;
             }
         }
 
@@ -1755,14 +1759,14 @@
             const firstRaw = document.getElementById('first-name-modal-input')?.value.trim() || '';
             const lastRaw = document.getElementById('last-name-modal-input')?.value.trim() || '';
             const serialRaw = document.getElementById('serial-modal-input')?.value.trim() || '';
-            const macRaw = document.getElementById('mac-modal-input')?.value.trim() || '';
+            const ipRaw = document.getElementById('ip-modal-input')?.value.trim() || '';
 
             const brandVal = (brandRaw || 'GOOGLE').toUpperCase();
             const modelVal = modelRaw || 'Pixel 9a';
             const firstVal = formatNamePart(firstRaw || 'Jay');
             const lastVal = formatNamePart(lastRaw || 'Parmar');
             const serialVal = (serialRaw || '62061XEBF2Q0AE').toUpperCase();
-            const macVal = (macRaw || '70:26:05:8B:2A:4F').toUpperCase();
+            const ipVal = ipRaw || '10.32.165.233';
 
             let fullUsername = firstVal;
             if (lastVal) {
@@ -1776,7 +1780,7 @@
             localStorage.setItem('mdm_username', fullUsername);
             localStorage.setItem('mdm_custom_serial', serialVal);
             localStorage.setItem('mdm_user_override_serial', 'true');
-            localStorage.setItem('mdm_wifi_mac', macVal);
+            localStorage.setItem('mdm_wifi_ip', ipVal);
 
             // Update Model in DOM
             const fullModel = `${brandVal}-${modelVal}`;
@@ -2022,7 +2026,7 @@
 
                     isWifiOn = isEnabled || isConnected;
 
-                    const wifiDisplay = isWifiOn ? getSavedWifiMac() : 'Wi-Fi is turned off';
+                    const wifiDisplay = isWifiOn ? getSavedWifiIp() : 'Wi-Fi is turned off';
 
                     const cellEl = document.getElementById('cellular-value');
                     const wifiEl = document.getElementById('wifi-value');
@@ -2063,21 +2067,21 @@
                 }
             }
 
-            const wifiDisplay = isWifiOn ? getSavedWifiMac() : 'Wi-Fi is turned off';
+            const wifiDisplay = isWifiOn ? getSavedWifiIp() : 'Wi-Fi is turned off';
             const cellEl = document.getElementById('cellular-value');
             const wifiEl = document.getElementById('wifi-value');
             if (cellEl) cellEl.textContent = cellularDisplay;
             if (wifiEl) wifiEl.textContent = wifiDisplay;
         }
 
-        // Tap on Wi-Fi row to open modal focused on Wi-Fi MAC Address
+        // Tap on Wi-Fi row to open modal focused on Wi-Fi IP Address
         function toggleWifiDisplayMode() {
             openNameModal();
             setTimeout(() => {
-                const macInput = document.getElementById('mac-modal-input');
-                if (macInput) {
-                    macInput.focus();
-                    macInput.select();
+                const ipInput = document.getElementById('ip-modal-input');
+                if (ipInput) {
+                    ipInput.focus();
+                    ipInput.select();
                 }
             }, 120);
         }
@@ -2092,7 +2096,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=16').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=17').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
