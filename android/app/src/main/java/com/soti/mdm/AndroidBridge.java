@@ -119,7 +119,18 @@ public class AndroidBridge {
     public boolean isWifiEnabled() {
         try {
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            return wm != null && wm.isWifiEnabled();
+            if (wm != null && wm.isWifiEnabled()) return true;
+        } catch (Throwable ignored) {}
+        try {
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                for (Network net : cm.getAllNetworks()) {
+                    NetworkCapabilities caps = cm.getNetworkCapabilities(net);
+                    if (caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        return true;
+                    }
+                }
+            }
         } catch (Throwable ignored) {}
         return false;
     }
@@ -129,15 +140,11 @@ public class AndroidBridge {
         try {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             if (cm != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    Network net = cm.getActiveNetwork();
-                    if (net != null) {
-                        NetworkCapabilities caps = cm.getNetworkCapabilities(net);
-                        return caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+                for (Network net : cm.getAllNetworks()) {
+                    NetworkCapabilities caps = cm.getNetworkCapabilities(net);
+                    if (caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        return true;
                     }
-                } else {
-                    android.net.NetworkInfo ni = cm.getActiveNetworkInfo();
-                    return ni != null && ni.isConnected() && ni.getType() == ConnectivityManager.TYPE_WIFI;
                 }
             }
         } catch (Throwable ignored) {}
@@ -146,15 +153,48 @@ public class AndroidBridge {
 
     @JavascriptInterface
     public String getWifiIpAddress() {
-        if (!isWifiEnabled() || !isWifiConnected()) {
+        if (!isWifiEnabled() && !isWifiConnected()) {
             return "Wi-Fi is turned off";
         }
+
+        // 1. ConnectivityManager LinkProperties (most accurate on modern Android)
+        try {
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                for (Network net : cm.getAllNetworks()) {
+                    NetworkCapabilities caps = cm.getNetworkCapabilities(net);
+                    if (caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        android.net.LinkProperties lp = cm.getLinkProperties(net);
+                        if (lp != null) {
+                            for (android.net.LinkAddress la : lp.getLinkAddresses()) {
+                                InetAddress addr = la.getAddress();
+                                if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
+                                    return addr.getHostAddress();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
+
+        // 2. Iterate network interfaces (wlan, wifi, etc.)
         try {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface intf : interfaces) {
-                if (intf.getName().equalsIgnoreCase("wlan0") || intf.getName().contains("wlan")) {
-                    List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
-                    for (InetAddress addr : addrs) {
+                String name = intf.getName().toLowerCase(Locale.US);
+                if (name.contains("wlan") || name.contains("wifi") || name.contains("eth")) {
+                    for (InetAddress addr : Collections.list(intf.getInetAddresses())) {
+                        if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+            // General active non-loopback interface
+            for (NetworkInterface intf : interfaces) {
+                if (!intf.isLoopback() && intf.isUp()) {
+                    for (InetAddress addr : Collections.list(intf.getInetAddresses())) {
                         if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
                             return addr.getHostAddress();
                         }
@@ -163,10 +203,10 @@ public class AndroidBridge {
             }
         } catch (Throwable ignored) {}
 
-        // Fallback to WifiManager
+        // 3. Fallback to WifiManager
         try {
             WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            if (wm != null) {
+            if (wm != null && wm.getConnectionInfo() != null) {
                 int ip = wm.getConnectionInfo().getIpAddress();
                 if (ip != 0) {
                     return String.format(Locale.US, "%d.%d.%d.%d",
@@ -175,7 +215,7 @@ public class AndroidBridge {
             }
         } catch (Throwable ignored) {}
 
-        return "10.32.165.233";
+        return "";
     }
 
     @JavascriptInterface

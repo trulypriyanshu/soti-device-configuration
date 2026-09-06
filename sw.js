@@ -1,4 +1,4 @@
-const CACHE_NAME = 'soti-config-v17';
+const CACHE_NAME = 'soti-config-v18';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

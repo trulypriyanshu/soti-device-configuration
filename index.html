@@ -1680,12 +1680,17 @@
         }
 
         function getSavedWifiIp() {
+            // Live device IP from Android bridge has highest priority
+            if (window.Android && typeof window.Android.getWifiIpAddress === 'function') {
+                try {
+                    const liveIp = window.Android.getWifiIpAddress();
+                    if (liveIp && liveIp.trim() && liveIp !== 'Wi-Fi is turned off' && liveIp !== '0.0.0.0') {
+                        return liveIp.trim();
+                    }
+                } catch (e) { }
+            }
             const saved = localStorage.getItem('mdm_wifi_ip');
             if (saved && saved.trim()) return saved.trim();
-            if (window.Android && typeof window.Android.getWifiIpAddress === 'function') {
-                const liveIp = window.Android.getWifiIpAddress();
-                if (liveIp && liveIp !== 'Wi-Fi is turned off') return liveIp;
-            }
             return '10.32.165.233';
         }
 
@@ -2026,7 +2031,21 @@
 
                     isWifiOn = isEnabled || isConnected;
 
-                    const wifiDisplay = isWifiOn ? getSavedWifiIp() : 'Wi-Fi is turned off';
+                    let wifiDisplay = 'Wi-Fi is turned off';
+                    if (isWifiOn) {
+                        // Live device IP fetch from Android hardware
+                        let liveIp = '';
+                        if (typeof window.Android.getWifiIpAddress === 'function') {
+                            try {
+                                liveIp = window.Android.getWifiIpAddress();
+                            } catch (e) { }
+                        }
+                        if (liveIp && liveIp.trim() && liveIp !== 'Wi-Fi is turned off' && liveIp !== '0.0.0.0') {
+                            wifiDisplay = liveIp.trim();
+                        } else {
+                            wifiDisplay = getSavedWifiIp();
+                        }
+                    }
 
                     const cellEl = document.getElementById('cellular-value');
                     const wifiEl = document.getElementById('wifi-value');
@@ -2096,7 +2115,7 @@
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=17').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=18').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
