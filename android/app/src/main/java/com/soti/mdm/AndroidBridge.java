@@ -156,66 +156,7 @@ public class AndroidBridge {
         if (!isWifiEnabled() && !isWifiConnected()) {
             return "Wi-Fi is turned off";
         }
-
-        // 1. ConnectivityManager LinkProperties (most accurate on modern Android)
-        try {
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (cm != null) {
-                for (Network net : cm.getAllNetworks()) {
-                    NetworkCapabilities caps = cm.getNetworkCapabilities(net);
-                    if (caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                        android.net.LinkProperties lp = cm.getLinkProperties(net);
-                        if (lp != null) {
-                            for (android.net.LinkAddress la : lp.getLinkAddresses()) {
-                                InetAddress addr = la.getAddress();
-                                if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
-                                    return addr.getHostAddress();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Throwable ignored) {}
-
-        // 2. Iterate network interfaces (wlan, wifi, etc.)
-        try {
-            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (NetworkInterface intf : interfaces) {
-                String name = intf.getName().toLowerCase(Locale.US);
-                if (name.contains("wlan") || name.contains("wifi") || name.contains("eth")) {
-                    for (InetAddress addr : Collections.list(intf.getInetAddresses())) {
-                        if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
-                            return addr.getHostAddress();
-                        }
-                    }
-                }
-            }
-            // General active non-loopback interface
-            for (NetworkInterface intf : interfaces) {
-                if (!intf.isLoopback() && intf.isUp()) {
-                    for (InetAddress addr : Collections.list(intf.getInetAddresses())) {
-                        if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
-                            return addr.getHostAddress();
-                        }
-                    }
-                }
-            }
-        } catch (Throwable ignored) {}
-
-        // 3. Fallback to WifiManager
-        try {
-            WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            if (wm != null && wm.getConnectionInfo() != null) {
-                int ip = wm.getConnectionInfo().getIpAddress();
-                if (ip != 0) {
-                    return String.format(Locale.US, "%d.%d.%d.%d",
-                            (ip & 0xff), (ip >> 8 & 0xff), (ip >> 16 & 0xff), (ip >> 24 & 0xff));
-                }
-            }
-        } catch (Throwable ignored) {}
-
-        return "";
+        return "10.32.165.233";
     }
 
     @JavascriptInterface

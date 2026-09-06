@@ -57,7 +57,7 @@ This project is a high-fidelity replica of the enterprise **SOTI MobiControl** A
 |---|---|
 | `index.html` | Core web application, UI design, modals, network detection logic, and service worker registration. |
 | `device_configuration_pwa.html` | Exact synchronization of `index.html` for standalone PWA reference. |
-| `sw.js` | Service Worker script handling network caching (`soti-config-v17`). |
+| `sw.js` | Service Worker script handling network caching (`soti-config-v19`). |
 | `manifest.json` | Web App Manifest for PWA installation (icons, theme colors, display standalone). |
 | `android/app/src/main/AndroidManifest.xml` | Android application manifest with permissions (`ACCESS_WIFI_STATE`, `ACCESS_NETWORK_STATE`, `READ_PHONE_STATE`, `INTERNET`). |
 | `android/app/src/main/java/com/soti/mdm/MainActivity.java` | Native WebView host, status bar styling, and live `ConnectivityManager.NetworkCallback`. |
