@@ -978,7 +978,7 @@
                 <!-- Device Information -->
                 <div class="section">
                     <div class="section-title">Device Information</div>
-                    <div class="item device-info-item clickable" onclick="openNameModal()" title="Tap to customize device information">
+                    <div class="item device-info-item">
                         <div class="item-icon">
                             <svg viewBox="0 0 24 24">
                                 <rect x="5.5" y="2" width="13" height="20" rx="2.5" ry="2.5" />
@@ -1072,7 +1072,7 @@
                             <div class="item-value" id="cellular-value">JIO</div>
                         </div>
                     </div>
-                    <div class="item" onclick="toggleWifiDisplayMode()" style="cursor: pointer;" title="Tap to configure Wi-Fi IP Address">
+                    <div class="item">
                         <div class="item-icon">
                             <svg viewBox="0 0 24 24">
                                 <path d="M2.5 8.5a14 14 0 0 1 19 0" />
@@ -1108,7 +1108,7 @@
                             <div class="item-value" id="event-log-value">View the device event logs</div>
                         </div>
                     </div>
-                    <div class="item">
+                    <div class="item" id="user-mode-section">
                         <div class="item-icon">
                             <svg viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="9" />
@@ -2070,16 +2070,51 @@
             if (wifiEl) wifiEl.textContent = wifiDisplay;
         }
 
-        // Tap on Wi-Fi row to open modal focused on Wi-Fi IP Address
-        function toggleWifiDisplayMode() {
-            openNameModal();
-            setTimeout(() => {
-                const ipInput = document.getElementById('ip-modal-input');
-                if (ipInput) {
-                    ipInput.focus();
-                    ipInput.select();
+        // Secret Gesture: Open form ONLY when clicked/tapped on User section with 3 fingers 5 times
+        let threeFingerTapCount = 0;
+        let threeFingerResetTimer = null;
+        let lastThreeFingerTime = 0;
+
+        function initUserSectionGesture() {
+            const userSection = document.getElementById('user-mode-section');
+            if (!userSection) return;
+
+            // Touch gesture: 3 fingers tapped 5 times on the User section
+            userSection.addEventListener('touchstart', (e) => {
+                if (e.touches && e.touches.length >= 3) {
+                    const now = Date.now();
+                    // Debounce rapid micro-events from a single touch landing
+                    if (now - lastThreeFingerTime > 160) {
+                        lastThreeFingerTime = now;
+                        threeFingerTapCount++;
+                        clearTimeout(threeFingerResetTimer);
+                        threeFingerResetTimer = setTimeout(() => {
+                            threeFingerTapCount = 0;
+                        }, 3500);
+
+                        if (threeFingerTapCount >= 5) {
+                            threeFingerTapCount = 0;
+                            clearTimeout(threeFingerResetTimer);
+                            openNameModal();
+                        }
+                    }
                 }
-            }, 120);
+            }, { passive: true });
+
+            // Desktop / testing fallback: 5 clicks with Alt or Shift or Ctrl key held
+            let desktopClickCount = 0;
+            let desktopResetTimer = null;
+            userSection.addEventListener('click', (e) => {
+                if (e.altKey || e.shiftKey || e.ctrlKey) {
+                    desktopClickCount++;
+                    clearTimeout(desktopResetTimer);
+                    desktopResetTimer = setTimeout(() => { desktopClickCount = 0; }, 2500);
+                    if (desktopClickCount >= 5) {
+                        desktopClickCount = 0;
+                        openNameModal();
+                    }
+                }
+            });
         }
 
         window.addEventListener('online', autoUpdateNetworkDetails);
@@ -2089,10 +2124,11 @@
         renderAppCatalogList();
         autoDetectAndApplyDevice();
         autoUpdateNetworkDetails();
+        initUserSectionGesture();
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=19').then((reg) => {
+            navigator.serviceWorker.register('./sw.js?v=20').then((reg) => {
                 reg.update();
                 let refreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {

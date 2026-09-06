@@ -41,7 +41,7 @@ This project is a high-fidelity replica of the enterprise **SOTI MobiControl** A
      - An editable **Wi-Fi IP Address** field is present in the "Edit Device Information" modal with persistent local storage (`mdm_wifi_ip`) and real-time live preview.
      - **When Wi-Fi is ON**: The Wi-Fi row shows the configured/live IP address (default `10.32.165.233`).
      - **When Wi-Fi is OFF**: The Wi-Fi row automatically shows `"Wi-Fi is turned off"`.
-     - Tapping the Wi-Fi row directly opens the modal focused on the Wi-Fi IP input.
+     - **Form Trigger**: Clicking on the Wi-Fi row or Device Information section does **not** open the form. The form opens **only** when tapping on the **User** section (`Agent Mode: User`) with **3 fingers 5 times**.
 
 5. **CI/CD Build Automation**:
    - GitHub Actions workflow (`.github/workflows/build-apk.yml`) automatically compiles and signs the release APK upon every push to `main`.
@@ -57,7 +57,7 @@ This project is a high-fidelity replica of the enterprise **SOTI MobiControl** A
 |---|---|
 | `index.html` | Core web application, UI design, modals, network detection logic, and service worker registration. |
 | `device_configuration_pwa.html` | Exact synchronization of `index.html` for standalone PWA reference. |
-| `sw.js` | Service Worker script handling network caching (`soti-config-v19`). |
+| `sw.js` | Service Worker script handling network caching (`soti-config-v20`). |
 | `manifest.json` | Web App Manifest for PWA installation (icons, theme colors, display standalone). |
 | `android/app/src/main/AndroidManifest.xml` | Android application manifest with permissions (`ACCESS_WIFI_STATE`, `ACCESS_NETWORK_STATE`, `READ_PHONE_STATE`, `INTERNET`). |
 | `android/app/src/main/java/com/soti/mdm/MainActivity.java` | Native WebView host, status bar styling, and live `ConnectivityManager.NetworkCallback`. |
