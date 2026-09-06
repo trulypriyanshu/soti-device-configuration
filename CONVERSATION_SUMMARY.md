@@ -52,7 +52,14 @@ This project is a high-fidelity replica of the enterprise **SOTI MobiControl** A
      - **Ongoing**: Non-dismissible / persistent (`setOngoing(true)`).
      - **Trigger**: App automatically checks `POST_NOTIFICATIONS` permission and triggers the persistent notification immediately on launch and resume.
 
-6. **CI/CD Build Automation**:
+6. **Full SOTI Loading Page (Blue Background, Logo, & Loading Bar)**:
+   - Replaced default Android splash screen with a branded `#0099DB` full loading screen:
+     - **Background**: SOTI Corporate Blue (`#0099DB`).
+     - **Logo**: White squircle badge container with centered SOTI logo.
+     - **Loading Bar**: Horizontal white indeterminate progress bar centered beneath the logo.
+   - Configured across both Android native launch (`values-v31/styles.xml`, `activity_main.xml`, `MainActivity.java`) and Web/PWA (`index.html`, `device_configuration_pwa.html`, `sw.js` cache `soti-config-v21`).
+
+7. **CI/CD Build Automation**:
    - GitHub Actions workflow (`.github/workflows/build-apk.yml`) automatically compiles and signs the release APK upon every push to `main`.
    - Generates release artifacts containing:
      - `SOTI-MobiControl-Release-Signed.apk`

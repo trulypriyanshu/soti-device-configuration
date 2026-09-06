@@ -10,12 +10,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.WindowInsetsController;
 import android.webkit.WebChromeClient;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "soti_mobicontrol_persistent";
     private static final int NOTIFICATION_ID = 1001;
     private static final int PERMISSION_REQ_CODE = 2001;
+    private boolean isLoaded = false;
 
     @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     @Override
@@ -45,8 +49,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Configure Status Bar
-        setupStatusBar();
+        // Keep status bar blue matching the SOTI loading screen
+        setupLoadingStatusBar();
+
+        // Safety fallback: ensure loading screen dismisses after 3.5 seconds
+        new Handler(Looper.getMainLooper()).postDelayed(this::hideLoadingScreen, 3500);
 
         // Show Persistent SOTI MobiControl Notification matching enterprise agent
         checkAndShowNotification();
@@ -85,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     progressBar.setVisibility(View.GONE);
                 }
+                if (newProgress >= 90) {
+                    hideLoadingScreen();
+                }
             }
         });
 
@@ -114,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 progressBar.setVisibility(View.GONE);
+                hideLoadingScreen();
             }
         });
 
@@ -166,6 +177,42 @@ public class MainActivity extends AppCompatActivity {
             webView.post(() -> {
                 webView.evaluateJavascript("if (typeof autoUpdateNetworkDetails === 'function') { autoUpdateNetworkDetails(); }", null);
             });
+        }
+    }
+
+    private void hideLoadingScreen() {
+        if (isLoaded) return;
+        isLoaded = true;
+        View loadingLayout = findViewById(R.id.loadingLayout);
+        if (loadingLayout != null) {
+            loadingLayout.animate()
+                    .alpha(0f)
+                    .setDuration(400)
+                    .withEndAction(() -> {
+                        loadingLayout.setVisibility(View.GONE);
+                        setupStatusBar();
+                    })
+                    .start();
+        } else {
+            setupStatusBar();
+        }
+    }
+
+    private void setupLoadingStatusBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(Color.parseColor("#0099DB"));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowInsetsController controller = getWindow().getInsetsController();
+                if (controller != null) {
+                    controller.setSystemBarsAppearance(
+                            0,
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    );
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                View decor = getWindow().getDecorView();
+                decor.setSystemUiVisibility(0);
+            }
         }
     }
 

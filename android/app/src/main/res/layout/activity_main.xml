@@ -2,8 +2,61 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff">
+    android:background="#0099DB">
 
+    <!-- The Web Application View -->
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Full SOTI Loading Page -->
+    <RelativeLayout
+        android:id="@+id/loadingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#0099DB"
+        android:clickable="true"
+        android:focusable="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:background="@drawable/loading_icon_bg"
+                android:elevation="4dp">
+
+                <ImageView
+                    android:id="@+id/loadingLogo"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_soti_logo"
+                    android:contentDescription="SOTI MobiControl" />
+
+            </FrameLayout>
+
+            <ProgressBar
+                android:id="@+id/centerProgressBar"
+                style="@android:style/Widget.Material.ProgressBar.Horizontal"
+                android:layout_width="160dp"
+                android:layout_height="4dp"
+                android:layout_marginTop="32dp"
+                android:indeterminate="true"
+                android:indeterminateTint="#FFFFFF"
+                android:progressTint="#FFFFFF" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- Top micro progress bar -->
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -14,11 +67,5 @@
         android:max="100"
         android:progressDrawable="@drawable/progress_bar"
         android:visibility="gone" />
-
-    <WebView
-        android:id="@+id/webview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/progressBar" />
 
 </RelativeLayout>
